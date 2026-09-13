@@ -44,3 +44,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Local AI assistant state and working notes (never commit)
+/.agents/
+/.codex/
+/[aA][gG][eE][nN][tT][sS].[mM][dD]
+/[cC][oO][dD][eE][xX].[mM][dD]
+/[mM][eE][mM][oO][rR][yY].[mM][dD]

@@ -32,6 +32,7 @@ const cadenceHint = requiredElement<HTMLElement>("#cadence-hint");
 let currentTabUrl: string | undefined;
 let currentDomain: string = "";
 let isRestricted: boolean = false;
+let strengthSaveTimeout: number | undefined;
 
 const CADENCE_HINTS: Record<ReadingCadence, string> = {
   all: "Every Word: Highlights fixation points across all eligible words.",
@@ -39,7 +40,9 @@ const CADENCE_HINTS: Record<ReadingCadence, string> = {
   alternating: "Alternating: Anchors every other word for an airy, rhythmic flow."
 };
 
-void hydrate();
+void hydrate().catch(() => {
+  showNotice("Anchor could not access this browser tab. Try reloading the extension.");
+});
 
 async function hydrate(): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -55,7 +58,16 @@ enabledInput.addEventListener("change", () => void save({ enabled: enabledInput.
 
 strengthInput.addEventListener("input", () => {
   strengthValue.value = `${strengthInput.value}%`;
-  void save({ fixationStrength: Number(strengthInput.value) });
+  const fixationStrength = Number(strengthInput.value);
+
+  // Sync storage permits only a limited number of writes. A range input can
+  // emit dozens of events during one drag, so save the final value after the
+  // user pauses while keeping the visual value responsive.
+  if (strengthSaveTimeout !== undefined) clearTimeout(strengthSaveTimeout);
+  strengthSaveTimeout = window.setTimeout(() => {
+    strengthSaveTimeout = undefined;
+    void save({ fixationStrength });
+  }, 800);
 });
 
 focusRulerInput.addEventListener("change", () => {
@@ -77,10 +89,14 @@ siteToggleBtn.addEventListener("click", async () => {
 });
 
 async function save(update: Partial<AnchorSettings>): Promise<void> {
-  const next: AnchorSettings = { ...DEFAULT_SETTINGS, ...(await getSettings()), ...update };
-  await chrome.storage.sync.set(next);
-  render(next);
-  await updateCurrentTab(next);
+  try {
+    const next: AnchorSettings = { ...DEFAULT_SETTINGS, ...(await getSettings()), ...update };
+    await chrome.storage.sync.set(next);
+    render(next);
+    await updateCurrentTab(next);
+  } catch {
+    showNotice("Could not save this setting. Please try again in a moment.");
+  }
 }
 
 function render(settings: AnchorSettings): void {

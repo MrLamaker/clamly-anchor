@@ -63,9 +63,10 @@ function replaceTextNode(textNode: Text, options: AnchorOptions): void {
   // later by the extension's MutationObserver.
   const wrapper = textNode.ownerDocument.createElement("span");
   wrapper.setAttribute(GENERATED_ATTRIBUTE, "text");
-  // The wrapper is only an idempotency marker. `display: contents` keeps it
-  // from becoming a new flex/grid item or otherwise changing page layout.
-  wrapper.style.display = "contents";
+  // Keep every original text node as one inline unit. `display: contents`
+  // promotes the bold prefix and remaining text to separate flex/grid items,
+  // which makes text in layout-heavy links appear as "Sta rted".
+  wrapper.style.display = "inline";
 
   for (const segment of segments) {
     if (!segment.bold) {

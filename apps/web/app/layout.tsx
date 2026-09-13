@@ -10,7 +10,7 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "Clamly Anchor — Focused Reading",
+  title: "Clamly Anchor - Focused Reading",
   description: "Explore visual fixation points for easier, more focused reading."
 };
 

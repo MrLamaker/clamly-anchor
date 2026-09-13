@@ -27,4 +27,16 @@ describe("processElement", () => {
     expect(root.textContent).toBe("Original content remains readable.");
     expect(root.querySelector("[data-clamly-anchor]")).toBeNull();
   });
+
+  it("keeps an anchored text node as one inline unit in flex layouts", () => {
+    const root = document.createElement("div");
+    root.innerHTML = '<a style="display: flex">Get Started</a>';
+
+    processElement(root);
+
+    const wrapper = root.querySelector<HTMLElement>('[data-clamly-anchor="text"]');
+    expect(wrapper?.style.display).toBe("inline");
+    expect(wrapper?.textContent).toBe("Get Started");
+    expect(wrapper?.querySelectorAll("b").length).toBeGreaterThan(0);
+  });
 });

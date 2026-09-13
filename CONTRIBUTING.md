@@ -23,8 +23,8 @@ Anchor is organized as a pnpm monorepo:
 
 ```bash
 # Clone the repository
-git clone https://github.com/clamly/anchor.git
-cd anchor
+git clone https://github.com/MrLamaker/clamly-anchor.git
+cd clamly-anchor
 
 # Install dependencies
 pnpm install
@@ -56,8 +56,8 @@ When modifying code in this repository, always uphold these non-negotiable acces
 1. **Never use `<strong>` for visual fixation anchors**:
    - Assistive screen readers (like NVDA, JAWS, VoiceOver) announce `<strong>` tags as verbal emphasis, making listening unbearable.
    - Use presentational `<b>` tags or CSS spans with `class="clamly-anchor-bold"`.
-2. **Preserve DOM Layout (`display: contents`)**:
-   - Wrapped text segments must use `display: contents` so wrapper elements never become unintended flex or grid items.
+2. **Preserve DOM Layout (inline wrapper)**:
+   - Each transformed text node must retain one inline wrapper. Do not use `display: contents`, which turns prefixes and suffixes into separate flex or grid items.
 3. **Respect Interactive & Semantic Regions**:
    - Skip text inside `<code>`, `<pre>`, `<script>`, `<style>`, `<svg>`, `<textarea>`, `<input>`, and regions with `role="navigation"`, `role="menu"`, or `isContentEditable`.
 4. **Idempotency & Restoration**:

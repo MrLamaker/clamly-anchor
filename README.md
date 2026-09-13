@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/clamly/anchor/actions/workflows/ci.yml"><img src="https://img.shields.io/badge/CI-Passing-22c55e.svg?style=flat-square" alt="CI Status"></a>
+  <a href="https://github.com/MrLamaker/clamly-anchor/actions/workflows/ci.yml"><img src="https://github.com/MrLamaker/clamly-anchor/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT"></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-3178c6.svg?style=flat-square" alt="TypeScript"></a>
-  <a href="https://github.com/clamly/anchor/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+  <a href="https://github.com/MrLamaker/clamly-anchor/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
 </p>
 
 Clamly Anchor creates artificial visual fixation points (inspired by saccadic eye movement research) on words without altering source text, screen-reader semantics, or page layouts.
@@ -21,16 +21,16 @@ Clamly Anchor creates artificial visual fixation points (inspired by saccadic ey
 
 ## Highlights
 
-- 🧠 **Saccadic Cadence Modes**:
+- **Saccadic Cadence Modes**:
   - `saccade`: Prioritizes content-rich words and keeps functional particles (*the, in, of, at*) soft to guide effortless eye jumps.
   - `all`: Classical high-fixation density across all eligible words.
   - `alternating`: Fixates every second word for an airy, rhythm-driven reading flow.
-- ⚡ **Real-time Reading Analytics**: Computes word counts, fixation density, active fixation counts, and estimated reading time savings in real-time.
-- 🛡️ **Screen Reader & Layout Safe**: Never uses semantic `<strong>` tags (which disrupt text-to-speech tools). Uses `<b>` prefixes wrapped in `display: contents` spans to guarantee zero layout shifts on flex or grid elements.
-- 🧭 **Per-Site Domain Controls**: The Chrome extension lets you toggle Anchor for specific sites, exclude problematic domains, or run globally with one click.
-- 📏 **Reading Focus Ruler**: Translucent horizontal reading guide that tracks your cursor to keep wide lines of text anchored.
-- ⌨️ **Keyboard Shortcut**: Instant `Alt+Shift+A` hotkey to toggle reading assistance on any tab.
-- 🔒 **Zero Tracking & 100% Private**: All text processing runs purely in memory within the client browser. Zero network requests or telemetry.
+- **Real-time Reading Analytics**: Computes word counts, fixation density, active fixation counts, and estimated reading time savings in real-time.
+- **Screen Reader & Layout Safe**: Never uses semantic `<strong>` tags (which disrupt text-to-speech tools). Uses presentational `<b>` prefixes within an inline wrapper so flex and grid layouts retain their original word flow.
+- **Per-Site Domain Controls**: The Chrome extension lets you toggle Anchor for specific sites, exclude problematic domains, or run globally with one click.
+- **Reading Focus Ruler**: Translucent horizontal reading guide that tracks your cursor to keep wide lines of text anchored.
+- **Keyboard Shortcut**: Instant `Alt+Shift+A` hotkey to toggle reading assistance on any tab.
+- **Zero Tracking & Local Only**: All text processing runs purely in memory within the client browser. Zero network requests or telemetry.
 
 ---
 
@@ -145,5 +145,4 @@ We welcome contributions from everyone! Whether you are optimizing fixation algo
 ## License
 
 MIT © [Clamly](https://github.com/clamly)
-
 

@@ -10,7 +10,7 @@ export type ReadingCadence = "all" | "alternating" | "saccade";
 export interface AnchorOptions {
   /**
    * Percentage of each eligible word used as its visual anchor. The default
-   * of 45 produces the intended 40–50% fixation point for longer words.
+   * of 45 produces the intended 40-50% fixation point for longer words.
    */
   fixationStrength?: number;
 

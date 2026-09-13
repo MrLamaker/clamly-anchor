@@ -20,6 +20,9 @@
       "48": "icons/icon-48.png"
     }
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "commands": {
     "toggle-anchor": {
       "suggested_key": {

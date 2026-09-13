@@ -37,7 +37,6 @@ void initialise();
 async function initialise(): Promise<void> {
   settings = await getContentSettings();
   applySettings();
-  setupKeyboardShortcut();
   setupStorageListener();
 }
 
@@ -186,18 +185,6 @@ function handlePointerMove(e: PointerEvent): void {
   rulerElement.style.top = `${targetTop}px`;
 }
 
-/** Global shortcut Alt+Shift+A listener */
-function setupKeyboardShortcut(): void {
-  window.addEventListener("keydown", (e) => {
-    if (e.altKey && e.shiftKey && (e.key === "A" || e.key === "a")) {
-      e.preventDefault();
-      settings.enabled = !settings.enabled;
-      void chrome.storage.sync.set({ enabled: settings.enabled });
-      applySettings();
-    }
-  });
-}
-
 function setupStorageListener(): void {
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "sync") return;
@@ -232,4 +219,3 @@ async function getContentSettings(): Promise<AnchorSettings> {
   };
 }
 })();
-

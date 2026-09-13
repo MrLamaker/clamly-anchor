@@ -109,11 +109,11 @@ export default function PlaygroundPage() {
           <h1>Find your reading rhythm in dense text.</h1>
           <p className="mt-3 max-w-2xl text-base text-[#6E6B5C] leading-relaxed">
             Anchor creates artificial fixation points that guide your eyes along natural saccadic trajectories.
-            Words and layout remain completely preserved—only the ease with which your brain navigates them changes.
+            Words and layout remain completely preserved - only the ease with which your brain navigates them changes.
           </p>
         </div>
 
-        {/* Workspace Card — Spacious Split-Screen */}
+        {/* Workspace Card - Spacious Split-Screen */}
         <section aria-label="Clamly Anchor Reader Studio" className="workspace rounded-2xl border border-[#D6D3C0] bg-[#FAF8F0] shadow-sm mb-14 overflow-hidden">
           {/* Sample Switcher Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#D6D3C0] bg-[#F5F2E6] px-6 py-4 sm:px-8">
