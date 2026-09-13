@@ -19,7 +19,7 @@ export const DEFAULT_SETTINGS: AnchorSettings = {
 };
 
 export async function getSettings(): Promise<AnchorSettings> {
-  const stored = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  const stored = await chrome.storage.sync.get<AnchorSettings>(DEFAULT_SETTINGS);
   return {
     enabled: Boolean(stored.enabled),
     fixationStrength: Math.min(80, Math.max(0, Number(stored.fixationStrength ?? 45))),
@@ -90,4 +90,3 @@ export function toggleDomainActive(settings: AnchorSettings, domain: string): An
     customSites: nextSites
   };
 }
-

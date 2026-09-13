@@ -14,7 +14,7 @@ export default defineConfig({
     {
       name: "copy-extension-manifest",
       closeBundle() {
-        copyFileSync(resolve(__dirname, "manifest.json"), resolve(__dirname, "dist/manifest.json"));
+        copyFileSync(resolve(import.meta.dirname, "manifest.json"), resolve(import.meta.dirname, "dist/manifest.json"));
       }
     }
   ],
@@ -23,9 +23,9 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, "popup.html"),
-        content: resolve(__dirname, "src/content.ts"),
-        background: resolve(__dirname, "src/background.ts")
+        popup: resolve(import.meta.dirname, "popup.html"),
+        content: resolve(import.meta.dirname, "src/content.ts"),
+        background: resolve(import.meta.dirname, "src/background.ts")
       },
       output: {
         entryFileNames: "[name].js",

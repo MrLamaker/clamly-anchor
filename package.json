@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "An open-source cognitive accessibility reader by Clamly.",
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@12.4.1",
   "scripts": {
     "build": "pnpm --recursive run build",
     "build:extension": "pnpm --filter @clamly/anchor-extension build",
@@ -12,6 +12,6 @@
     "test": "pnpm --recursive run test"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^7.0.2"
   }
 }
