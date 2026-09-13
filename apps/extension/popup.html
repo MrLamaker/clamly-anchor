@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clamly Anchor</title>
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="popup-header">
+        <div class="header-branding">
+          <p class="brand">clamly</p>
+          <p class="product">Anchor</p>
+        </div>
+        <kbd class="shortcut-pill" title="Toggle Anchor shortcut">Alt+Shift+A</kbd>
+      </header>
+
+      <!-- Active Domain / Restricted Tab Badge -->
+      <section id="site-card" class="site-card">
+        <div class="site-info">
+          <span id="site-status-dot" class="site-status-dot active"></span>
+          <div class="site-labels">
+            <strong id="site-domain">Active site</strong>
+            <small id="site-status-text">Anchor active on this page</small>
+          </div>
+        </div>
+        <button type="button" id="site-toggle-btn" class="site-toggle-btn" aria-label="Toggle Anchor for this site">
+          Active
+        </button>
+      </section>
+
+      <!-- Restricted Page Warning -->
+      <div id="restricted-notice" class="restricted-notice" hidden>
+        <strong>Browser Protected Page</strong>
+        <p>Chrome prevents extensions from running on system, store, and extension pages for security.</p>
+      </div>
+
+      <section class="popup-controls" aria-label="Anchor controls">
+        <!-- Master Enable Switch -->
+        <label class="toggle-row" for="enabled">
+          <span>
+            <strong>Reader Active</strong>
+            <small id="toggle-state">Off</small>
+          </span>
+          <input id="enabled" type="checkbox" role="switch" />
+          <span class="toggle-visual" aria-hidden="true"><i></i></span>
+        </label>
+
+        <!-- Cadence Strategy Selector -->
+        <div class="control-section">
+          <div class="control-heading">
+            <span class="control-label">Reading Cadence</span>
+          </div>
+          <div class="cadence-selector" role="radiogroup" aria-label="Reading Cadence">
+            <button type="button" class="cadence-pill" data-cadence="all" role="radio" aria-checked="true">
+              Every Word
+            </button>
+            <button type="button" class="cadence-pill active" data-cadence="saccade" role="radio" aria-checked="false">
+              Saccade
+            </button>
+            <button type="button" class="cadence-pill" data-cadence="alternating" role="radio" aria-checked="false">
+              Alternating
+            </button>
+          </div>
+          <p class="control-hint" id="cadence-hint">Saccade: Prioritizes content words and keeps stop words soft.</p>
+        </div>
+
+        <!-- Fixation Strength Slider -->
+        <div class="control-section strength-control">
+          <div class="control-heading">
+            <label for="fixation-strength" class="control-label">Fixation Strength</label>
+            <output id="strength-value" for="fixation-strength">45%</output>
+          </div>
+          <input id="fixation-strength" class="strength-range" type="range" min="0" max="80" value="45" />
+          <p class="control-hint">Portion of each anchored word highlighted.</p>
+        </div>
+
+        <!-- Focus Ruler Toggle -->
+        <label class="toggle-row ruler-row" for="focus-ruler">
+          <span>
+            <strong>Reading Focus Ruler</strong>
+            <small>Translucent guide follows your reading line</small>
+          </span>
+          <input id="focus-ruler" type="checkbox" role="switch" />
+          <span class="toggle-visual" aria-hidden="true"><i></i></span>
+        </label>
+      </section>
+
+      <p id="popup-notice" class="popup-notice" role="status" hidden></p>
+
+      <footer class="popup-footer">
+        <span>Clamly Anchor is open source</span>
+        <a href="https://clamly.app" target="_blank" rel="noopener noreferrer">clamly.app</a>
+      </footer>
+    </main>
+    <script type="module" src="/src/popup.ts"></script>
+  </body>
+</html>
