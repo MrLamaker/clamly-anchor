@@ -8,6 +8,8 @@ export default defineConfig({
   // script, using the project compiler directly.
   dts: false,
   sourcemap: true,
-  clean: true,
+  // Keep the previous output available while a dependent workspace is
+  // resolving this package during concurrent monorepo builds.
+  clean: false,
   target: "es2022"
 });

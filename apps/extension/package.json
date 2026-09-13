@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite build --watch",
+    "prebuild": "pnpm --filter @clamly/anchor build",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "echo \"No extension tests configured yet\""
