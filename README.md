@@ -29,7 +29,7 @@ Clamly Anchor creates artificial visual fixation points (inspired by saccadic ey
 - **Screen Reader & Layout Safe**: Never uses semantic `<strong>` tags (which disrupt text-to-speech tools). Uses presentational `<b>` prefixes within an inline wrapper so flex and grid layouts retain their original word flow.
 - **Per-Site Domain Controls**: The Chrome extension lets you toggle Anchor for specific sites, exclude problematic domains, or run globally with one click.
 - **Reading Focus Ruler**: Translucent horizontal reading guide that tracks your cursor to keep wide lines of text anchored.
-- **Keyboard Shortcut**: Instant `Alt+Shift+A` hotkey to toggle reading assistance on any tab.
+- **Keyboard Shortcut**: Press `Ctrl+Shift+A` on Windows/Linux or `Command+Shift+A` on macOS to toggle reading assistance on the active tab.
 - **Zero Tracking & Local Only**: All text processing runs purely in memory within the client browser. Zero network requests or telemetry.
 
 ---
@@ -103,7 +103,7 @@ To load in Chrome / Chromium browsers:
 1. Open `chrome://extensions` in your browser.
 2. Toggle on **Developer mode** in the top-right corner.
 3. Click **Load unpacked** and select `apps/extension/dist`.
-4. Press `Alt+Shift+A` or click the toolbar icon on any article to start reading!
+4. Press `Ctrl+Shift+A` on Windows/Linux or `Command+Shift+A` on macOS, or click the toolbar icon on any article to start reading!
 
 ---
 
@@ -144,5 +144,4 @@ We welcome contributions from everyone! Whether you are optimizing fixation algo
 
 ## License
 
-MIT © [Clamly](https://github.com/clamly)
-
+MIT © Clamly

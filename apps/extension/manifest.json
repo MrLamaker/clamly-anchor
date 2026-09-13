@@ -26,8 +26,8 @@
   "commands": {
     "toggle-anchor": {
       "suggested_key": {
-        "default": "Alt+Shift+A",
-        "mac": "Alt+Shift+A"
+        "default": "Ctrl+Shift+A",
+        "mac": "Command+Shift+A"
       },
       "description": "Toggle Clamly Anchor on current page"
     }
