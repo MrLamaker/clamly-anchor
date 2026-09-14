@@ -7,7 +7,7 @@
     "build": {
       "inputs": [{ "step": "install" }],
       "commands": ["pnpm --filter @clamly/anchor-web build"],
-      "deployOutputs": ["."]
+      "deployOutputs": [{ "include": ["."] }]
     }
   },
   "deploy": {
