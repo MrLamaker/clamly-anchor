@@ -10,8 +10,9 @@
 
 <p align="center">
   <a href="https://github.com/MrLamaker/clamly-anchor/actions/workflows/ci.yml"><img src="https://github.com/MrLamaker/clamly-anchor/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
+  <a href="https://www.npmjs.com/package/@clamly/anchor"><img src="https://img.shields.io/npm/v/@clamly/anchor.svg?style=flat-square" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License: MIT"></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-3178c6.svg?style=flat-square" alt="TypeScript"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-7.x-3178c6.svg?style=flat-square" alt="TypeScript"></a>
   <a href="https://github.com/MrLamaker/clamly-anchor/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
 </p>
 
@@ -54,8 +55,8 @@ reader/
 ## Quickstart
 
 ### Requirements
-- Node.js >= 20.x
-- pnpm >= 9.x
+- Node.js >= 24.x
+- pnpm 12.4.1
 
 ```bash
 # Install dependencies

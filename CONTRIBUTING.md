@@ -16,8 +16,8 @@ Anchor is organized as a pnpm monorepo:
 
 ### Prerequisites
 
-- Node.js >= 20.x
-- pnpm >= 9.x
+- Node.js >= 24.x
+- pnpm 12.4.1
 
 ### Getting Started
 
