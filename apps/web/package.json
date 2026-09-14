@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "pnpm --filter @clamly/anchor build",
     "build": "next build",
+    "start": "next start",
     "typecheck": "pnpm --filter @clamly/anchor build && tsc --noEmit",
     "test": "echo \"No web tests configured yet\""
   },

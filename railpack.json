@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "steps": {
+    "install": {
+      "commands": ["pnpm install --frozen-lockfile"]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": ["pnpm --filter @clamly/anchor-web build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @clamly/anchor-web start"
+  }
+}

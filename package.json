@@ -4,6 +4,10 @@
   "private": true,
   "description": "An open-source cognitive accessibility reader by Clamly.",
   "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": "12.4.1"
+  },
   "scripts": {
     "build": "pnpm --recursive run build",
     "build:extension": "pnpm --filter @clamly/anchor-extension build",
