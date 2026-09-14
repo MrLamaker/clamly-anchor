@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateReadingMetrics, getWordParts, splitText } from "../src/processor";
+import { calculateReadingMetrics, getWordParts, isAnchorOptions, processText, splitText } from "../src/processor";
 
 describe("getWordParts", () => {
   it("anchors short words with their first letter", () => {
@@ -45,6 +45,20 @@ describe("splitText", () => {
     // 'quick' should be anchored
     const hasBoldQuick = segments.some((s) => s.bold && s.value === "qu");
     expect(hasBoldQuick).toBe(true);
+  });
+});
+
+describe("processText", () => {
+  it("returns safe HTML without requiring a DOM", () => {
+    expect(processText("Read <fast> & safely")).toBe('<b class="clamly-anchor-bold">Re</b>ad &lt;<b class="clamly-anchor-bold">fa</b>st&gt; &amp; <b class="clamly-anchor-bold">saf</b>ely');
+  });
+});
+
+describe("option validation", () => {
+  it("rejects invalid runtime values instead of coercing them", () => {
+    expect(isAnchorOptions({ fixationStrength: 45, minimumWordLength: 2, cadence: "all" })).toBe(true);
+    expect(isAnchorOptions({ fixationStrength: 101 })).toBe(false);
+    expect(() => splitText("text", { minimumWordLength: 1.5 })).toThrow(TypeError);
   });
 });
 

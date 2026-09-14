@@ -50,3 +50,6 @@ Thumbs.db
 /[aA][gG][eE][nN][tT][sS].[mM][dD]
 /[cC][oO][dD][eE][xX].[mM][dD]
 /[mM][eE][mM][oO][rR][yY].[mM][dD]
+
+# Personal deployment notes (kept out of the public repository)
+RAILWAY-DEPLOYMENT.local.md

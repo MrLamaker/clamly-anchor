@@ -39,4 +39,32 @@ describe("processElement", () => {
     expect(wrapper?.textContent).toBe("Get Started");
     expect(wrapper?.querySelectorAll("b").length).toBeGreaterThan(0);
   });
+
+  it("honors custom skipped tags and roles", () => {
+    const root = document.createElement("div");
+    root.innerHTML = '<aside>Leave this alone</aside><p role="note">Process this text</p>';
+
+    processElement(root, { skipTags: ["aside"], skipRoles: ["note"] });
+
+    expect(root.querySelector("aside")?.querySelector("b")).toBeNull();
+    expect(root.querySelector('[role="note"]')?.querySelector("b")).toBeNull();
+  });
+
+  it("notifies callers after each transformed text node", () => {
+    const root = document.createElement("div");
+    root.innerHTML = "<p>First sentence.</p><p>Second sentence.</p>";
+    const processed: Array<{ originalText: string; fixationCount: number }> = [];
+
+    processElement(root, {
+      onNodeProcessed: ({ originalText, fixationCount, wrapper }) => {
+        processed.push({ originalText, fixationCount });
+        expect(wrapper.parentElement?.tagName).toBe("P");
+      }
+    });
+
+    expect(processed).toEqual([
+      { originalText: "First sentence.", fixationCount: 2 },
+      { originalText: "Second sentence.", fixationCount: 2 }
+    ]);
+  });
 });

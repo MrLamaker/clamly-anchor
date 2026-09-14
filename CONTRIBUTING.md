@@ -9,14 +9,14 @@ Anchor is an open-source cognitive accessibility suite designed to support indiv
 Anchor is organized as a pnpm monorepo:
 
 - **`packages/core` (`@clamly/anchor`)**: A zero-dependency, headless TypeScript package containing the fixation algorithm, DOM traversal engine, and reading analytics.
-- **`apps/web`**: Next.js (App Router) + Tailwind CSS interactive Reader Studio and public showcase.
+- **`apps/web`**: Next.js 16.3.5 (App Router) + Tailwind CSS 4.3.3 interactive Reader Studio and public showcase.
 - **`apps/extension`**: Manifest V3 browser extension built with Vite, featuring per-site activation, reading focus ruler, and customizable cadence modes.
 
 ## Development Setup
 
 ### Prerequisites
 
-- Node.js >= 24.x
+- Node.js >= 24 <25
 - pnpm 12.4.1
 
 ### Getting Started

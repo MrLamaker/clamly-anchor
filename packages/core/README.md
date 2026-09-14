@@ -68,15 +68,41 @@ console.log(metrics.estimatedSecondsSaved);      // estimated time saved
 
 ---
 
+### `processText(text, options?)`
+
+Creates safe, ready-to-render HTML without accessing `document`, making it useful in Node.js, static-site generators, and server-rendered templates. Input text is HTML-escaped; only generated fixation prefixes use `<b class="clamly-anchor-bold">`.
+
+```typescript
+import { processText } from "@clamly/anchor";
+
+const html = processText("Read <safely>", { cadence: "saccade" });
+// '<b class="clamly-anchor-bold">R</b>ead &lt;...'
+```
+
+---
+
 ### `processElement(element, options?)`
 
-Transforms all eligible text nodes inside a DOM element **in-place**, wrapping fixation prefixes in presentational `<b>` tags with `aria-hidden="true"`.
+Transforms all eligible text nodes inside a DOM element **in-place**, wrapping fixation prefixes in presentational `<b>` tags marked with Clamly Anchor's generated-data attributes.
 
 ```typescript
 import { processElement } from "@clamly/anchor";
 
 const article = document.querySelector("article")!;
 processElement(article, { fixationStrength: 45, cadence: "saccade" });
+```
+
+Use `skipTags` and `skipRoles` to add protected regions. They are case-insensitive and supplement—not replace—the built-in safety list.
+
+```typescript
+processElement(article, {
+  skipTags: ["aside", "figure"],
+  skipRoles: ["status"],
+  onNodeProcessed: ({ originalText, wrapper, fixationCount }) => {
+    console.log(`Anchored ${fixationCount} words in: ${originalText}`);
+    wrapper.dataset.processedBy = "my-reader";
+  }
+});
 ```
 
 > **Screen-reader safe**: Uses `<b>` (presentational) not `<strong>` (semantic), so assistive technologies are not affected.
@@ -103,6 +129,10 @@ restoreElement(article);
 | `minimumWordLength` | `number` | `1` | Words shorter than this are left untouched |
 | `cadence` | `ReadingCadence` | `"all"` | Fixation rhythm: `"all"`, `"alternating"`, or `"saccade"` |
 
+`processElement` also accepts `skipTags`, `skipRoles`, and `onNodeProcessed`. The callback receives `originalText`, the generated `wrapper`, and `fixationCount`.
+
+Options are validated at runtime as well as by TypeScript: `fixationStrength` must be a finite number from 0 through 100, `minimumWordLength` a positive integer, and `cadence` one of the listed values. Invalid values throw `TypeError`; they are not silently coerced. For untyped configuration, use `isAnchorOptions(value)` or `assertValidAnchorOptions(value)` before processing.
+
 ### Cadence modes
 
 | Mode | Description |
@@ -120,6 +150,8 @@ Full type definitions are included. Key exported types:
 ```typescript
 import type {
   AnchorOptions,
+  ProcessElementOptions,
+  ProcessedTextNode,
   ReadingCadence,
   ReadingMetrics,
   TextSegment,

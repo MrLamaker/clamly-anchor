@@ -23,6 +23,34 @@ export interface AnchorOptions {
   cadence?: ReadingCadence;
 }
 
+/** Details supplied after `processElement` transforms one text node. */
+export interface ProcessedTextNode {
+  /** Text before Clamly Anchor added any markup. */
+  originalText: string;
+  /** The generated wrapper that replaced the original text node. */
+  wrapper: HTMLSpanElement;
+  /** Number of fixation prefixes generated in this text node. */
+  fixationCount: number;
+}
+
+/** Options available only to the DOM-based `processElement` API. */
+export interface ProcessElementOptions extends AnchorOptions {
+  /**
+   * Additional HTML tag names whose descendants must not be processed.
+   * Values are matched case-insensitively and are added to the safe defaults.
+   */
+  skipTags?: readonly string[];
+
+  /**
+   * Additional ARIA roles whose descendants must not be processed.
+   * Values are matched case-insensitively and are added to the safe defaults.
+   */
+  skipRoles?: readonly string[];
+
+  /** Called after an eligible text node has been transformed. */
+  onNodeProcessed?: (node: ProcessedTextNode) => void;
+}
+
 /** A word split into its unstyled suffix and visually bold prefix. */
 export interface WordParts {
   prefix: string;

@@ -10,6 +10,6 @@
     }
   },
   "deploy": {
-    "startCommand": "pnpm --filter @clamly/anchor-web start"
+    "startCommand": "pnpm --filter @clamly/anchor-web run start"
   }
 }

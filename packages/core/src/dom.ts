@@ -1,18 +1,21 @@
 import { GENERATED_ATTRIBUTE, SKIPPED_ROLES, SKIPPED_TAGS } from "./constants";
-import { splitText } from "./processor";
-import type { AnchorOptions } from "./types";
+import { assertValidAnchorOptions, splitText } from "./processor";
+import type { ProcessElementOptions } from "./types";
 
 /**
  * Applies visual anchors to text nodes below an element. Generated `<b>` tags
  * are purely presentational; unlike `<strong>`, they do not add emphasis for
  * assistive technology.
  */
-export function processElement(element: HTMLElement, options: AnchorOptions = {}): void {
+export function processElement(element: HTMLElement, options: ProcessElementOptions = {}): void {
+  assertValidProcessElementOptions(options);
+  const skippedTags = new Set([...SKIPPED_TAGS, ...(options.skipTags ?? []).map((tag) => tag.toUpperCase())]);
+  const skippedRoles = new Set([...SKIPPED_ROLES, ...(options.skipRoles ?? []).map((role) => role.toLowerCase())]);
   const document = element.ownerDocument;
   const nodeFilter = document.defaultView?.NodeFilter ?? NodeFilter;
   const walker = document.createTreeWalker(element, nodeFilter.SHOW_TEXT, {
     acceptNode(node) {
-      return shouldProcessTextNode(node)
+      return shouldProcessTextNode(node, skippedTags, skippedRoles)
         ? nodeFilter.FILTER_ACCEPT
         : nodeFilter.FILTER_REJECT;
     }
@@ -35,7 +38,7 @@ export function restoreElement(element: HTMLElement): void {
   element.normalize();
 }
 
-function shouldProcessTextNode(node: Node): node is Text {
+function shouldProcessTextNode(node: Node, skippedTags: ReadonlySet<string>, skippedRoles: ReadonlySet<string>): node is Text {
   if (node.nodeType !== node.TEXT_NODE || !node.nodeValue?.trim()) return false;
   const parent = node.parentElement;
   if (!parent) return false;
@@ -43,10 +46,10 @@ function shouldProcessTextNode(node: Node): node is Text {
   for (let current: Element | null = parent; current; current = current.parentElement) {
     const role = current.getAttribute("role");
     if (
-      SKIPPED_TAGS.has(current.tagName)
+      skippedTags.has(current.tagName)
       || current.hasAttribute(GENERATED_ATTRIBUTE)
       || (current as HTMLElement).isContentEditable === true
-      || (role !== null && SKIPPED_ROLES.has(role))
+      || (role !== null && skippedRoles.has(role.toLowerCase()))
       || current.hasAttribute("aria-live")
       || current.getAttribute("aria-hidden") === "true"
     ) return false;
@@ -54,7 +57,7 @@ function shouldProcessTextNode(node: Node): node is Text {
   return true;
 }
 
-function replaceTextNode(textNode: Text, options: AnchorOptions): void {
+function replaceTextNode(textNode: Text, options: ProcessElementOptions): void {
   const segments = splitText(textNode.data, options);
   if (!segments.some((segment) => segment.bold)) return;
 
@@ -81,4 +84,31 @@ function replaceTextNode(textNode: Text, options: AnchorOptions): void {
     wrapper.append(bold);
   }
   textNode.replaceWith(wrapper);
+  options.onNodeProcessed?.({
+    originalText: textNode.data,
+    wrapper,
+    fixationCount: segments.filter((segment) => segment.bold).length
+  });
+}
+
+/** Throws a `TypeError` for invalid DOM-only options before any nodes change. */
+export function assertValidProcessElementOptions(options: unknown): asserts options is ProcessElementOptions {
+  if (typeof options !== "object" || options === null || Array.isArray(options)) {
+    throw new TypeError("Invalid processElement options.");
+  }
+
+  assertValidAnchorOptions(options);
+
+  const value = options as Record<string, unknown>;
+  if (
+    !isStringList(value.skipTags)
+    || !isStringList(value.skipRoles)
+    || (value.onNodeProcessed !== undefined && typeof value.onNodeProcessed !== "function")
+  ) {
+    throw new TypeError("Invalid processElement options: skipTags and skipRoles must be arrays of strings, and onNodeProcessed must be a function.");
+  }
+}
+
+function isStringList(value: unknown): value is readonly string[] | undefined {
+  return value === undefined || (Array.isArray(value) && value.every((item) => typeof item === "string" && item.trim().length > 0));
 }

@@ -15,11 +15,31 @@ export interface ResolvedAnchorOptions {
   cadence: ReadingCadence;
 }
 
+/** Returns whether an unknown value is a valid set of text-processing options. */
+export function isAnchorOptions(value: unknown): value is AnchorOptions {
+  if (!isPlainObject(value)) return false;
+  const options = value as Record<string, unknown>;
+
+  return (
+    (options.fixationStrength === undefined || (typeof options.fixationStrength === "number" && Number.isFinite(options.fixationStrength) && options.fixationStrength >= 0 && options.fixationStrength <= 100))
+    && (options.minimumWordLength === undefined || (typeof options.minimumWordLength === "number" && Number.isInteger(options.minimumWordLength) && options.minimumWordLength >= 1))
+    && (options.cadence === undefined || options.cadence === "all" || options.cadence === "alternating" || options.cadence === "saccade")
+  );
+}
+
+/** Throws a `TypeError` when values from JavaScript or external config are invalid. */
+export function assertValidAnchorOptions(options: unknown): asserts options is AnchorOptions {
+  if (!isAnchorOptions(options)) {
+    throw new TypeError("Invalid Anchor options: fixationStrength must be a finite number from 0 to 100, minimumWordLength must be a positive integer, and cadence must be 'all', 'alternating', or 'saccade'.");
+  }
+}
+
 /** Normalise public options once so all entry points behave consistently. */
 export function resolveOptions(options: AnchorOptions = {}): ResolvedAnchorOptions {
+  assertValidAnchorOptions(options);
   return {
-    fixationStrength: clamp(options.fixationStrength ?? DEFAULT_STRENGTH, 0, 100),
-    minimumWordLength: Math.max(1, Math.floor(options.minimumWordLength ?? DEFAULT_MINIMUM_WORD_LENGTH)),
+    fixationStrength: options.fixationStrength ?? DEFAULT_STRENGTH,
+    minimumWordLength: options.minimumWordLength ?? DEFAULT_MINIMUM_WORD_LENGTH,
     cadence: options.cadence ?? DEFAULT_CADENCE
   };
 }
@@ -79,6 +99,19 @@ export function splitText(text: string, options: AnchorOptions = {}): TextSegmen
 }
 
 /**
+ * Produces escaped HTML with presentational `<b>` fixation prefixes. This is
+ * suitable for server-side rendering and other environments without a DOM.
+ */
+export function processText(text: string, options: AnchorOptions = {}): string {
+  return splitText(text, options)
+    .map(({ value, bold }) => {
+      const escaped = escapeHtml(value);
+      return bold ? `<b class="clamly-anchor-bold">${escaped}</b>` : escaped;
+    })
+    .join("");
+}
+
+/**
  * Computes quantitative reading metrics and cognitive speed estimation
  * for a passage of text under the specified Anchor options.
  */
@@ -123,6 +156,16 @@ function getPrefixLength(length: number, strength: number): number {
   return Math.min(length - 1, Math.max(1, Math.round((length * strength) / 100)));
 }
 
-function clamp(value: number, minimum: number, maximum: number): number {
-  return Math.min(maximum, Math.max(minimum, Number.isFinite(value) ? value : minimum));
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character] ?? character);
 }

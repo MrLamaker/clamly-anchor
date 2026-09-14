@@ -45,7 +45,7 @@ reader/
 │       ├── src/dom.ts         # TreeWalker DOM parser & restoration
 │       └── test/              # Vitest test suite
 ├── apps/
-│   ├── web/             # Next.js 15 App Router + Tailwind interactive Reader Studio
+│   ├── web/             # Next.js 16 App Router + Tailwind interactive Reader Studio
 │   └── extension/       # Chrome Manifest V3 extension (Vite + TS)
 └── .github/             # Issue templates, PR templates, and CI workflows
 ```
@@ -55,7 +55,7 @@ reader/
 ## Quickstart
 
 ### Requirements
-- Node.js >= 24.x
+- Node.js >= 24 <25
 - pnpm 12.4.1
 
 ```bash
@@ -77,6 +77,8 @@ pnpm build
 ## Applications
 
 ### 1. Web Reader Studio (`apps/web`)
+
+The Reader Studio uses Next.js 16.3.5, React 19.3.0, and Tailwind CSS 4.3.3.
 
 Launch the interactive showcase locally at `http://localhost:3000`:
 
@@ -106,12 +108,10 @@ To load in Chrome / Chromium browsers:
 3. Click **Load unpacked** and select `apps/extension/dist`.
 4. Press `Ctrl+Shift+A` on Windows/Linux or `Command+Shift+A` on macOS, or click the toolbar icon on any article to start reading!
 
----
-
 ## API Usage (`@clamly/anchor`)
 
 ```typescript
-import { splitText, processElement, restoreElement, calculateReadingMetrics } from "@clamly/anchor";
+import { processText, splitText, processElement, restoreElement, calculateReadingMetrics } from "@clamly/anchor";
 
 // 1. Text processing for custom UIs
 const segments = splitText("Reading dense material asks a lot of our attention.", {
@@ -120,6 +120,9 @@ const segments = splitText("Reading dense material asks a lot of our attention."
   cadence: "saccade"
 });
 
+// Server-side / non-DOM rendering (HTML is escaped safely)
+const html = processText("Reading dense material");
+
 // 2. Real-time reading metrics
 const metrics = calculateReadingMetrics(text, { cadence: "saccade" });
 console.log(`Estimated speed: ${metrics.estimatedWordsPerMinute} WPM`);
@@ -127,7 +130,12 @@ console.log(`Saved time: ${metrics.estimatedSecondsSaved} seconds`);
 
 // 3. In-place DOM transformation
 const article = document.querySelector("article");
-processElement(article, { fixationStrength: 45, cadence: "saccade" });
+processElement(article, {
+  fixationStrength: 45,
+  cadence: "saccade",
+  skipTags: ["aside"],
+  onNodeProcessed: ({ fixationCount }) => console.log(fixationCount)
+});
 
 // 4. Clean restoration
 restoreElement(article);
