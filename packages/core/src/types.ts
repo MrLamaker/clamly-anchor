@@ -6,6 +6,16 @@
  */
 export type ReadingCadence = "all" | "alternating" | "saccade";
 
+/** Context supplied to a custom word-selection predicate. */
+export interface WordAnchorContext {
+  /** The exact word as it appears in the input. */
+  word: string;
+  /** A lowercase form of `word`, useful for dictionary matching. */
+  normalizedWord: string;
+  /** Zero-based position among all words in the processed text node or string. */
+  index: number;
+}
+
 /** Configuration shared by text and DOM processing APIs. */
 export interface AnchorOptions {
   /**
@@ -21,6 +31,17 @@ export interface AnchorOptions {
    * Reading rhythm cadence. Defaults to 'all'.
    */
   cadence?: ReadingCadence;
+
+  /**
+   * Additional words that must remain unanchored. Matching is case-insensitive.
+   */
+  skipWords?: readonly string[];
+
+  /**
+   * An additional word-selection policy. It runs for words that pass the
+   * built-in length, cadence, and dictionary checks; return `false` to skip.
+   */
+  shouldAnchorWord?: (context: WordAnchorContext) => boolean;
 }
 
 /** Details supplied after `processElement` transforms one text node. */

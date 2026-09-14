@@ -38,6 +38,8 @@ const segments = splitText("Reading dense material asks a lot of our attention."
   fixationStrength: 45,  // % of word used as anchor (default: 45)
   minimumWordLength: 1,  // min chars to be eligible (default: 1)
   cadence: "saccade",   // "all" | "alternating" | "saccade" (default: "all")
+  skipWords: ["API", "OAuth"], // custom case-insensitive dictionary
+  shouldAnchorWord: ({ index }) => index < 100 // optional per-word policy
 });
 
 // Render segments yourself:
@@ -76,7 +78,7 @@ Creates safe, ready-to-render HTML without accessing `document`, making it usefu
 import { processText } from "@clamly/anchor";
 
 const html = processText("Read <safely>", { cadence: "saccade" });
-// '<b class="clamly-anchor-bold">R</b>ead &lt;...'
+// '<b class="clamly-anchor-bold">Re</b>ad &lt;...'
 ```
 
 ---
@@ -128,10 +130,14 @@ restoreElement(article);
 | `fixationStrength` | `number` | `45` | Percentage of each word used as the visual anchor (40–50 is optimal) |
 | `minimumWordLength` | `number` | `1` | Words shorter than this are left untouched |
 | `cadence` | `ReadingCadence` | `"all"` | Fixation rhythm: `"all"`, `"alternating"`, or `"saccade"` |
+| `skipWords` | `readonly string[]` | `[]` | Extra words to leave unanchored; matched case-insensitively |
+| `shouldAnchorWord` | `(context: WordAnchorContext) => boolean` | — | Return `false` to skip an otherwise eligible word |
 
 `processElement` also accepts `skipTags`, `skipRoles`, and `onNodeProcessed`. The callback receives `originalText`, the generated `wrapper`, and `fixationCount`.
 
 Options are validated at runtime as well as by TypeScript: `fixationStrength` must be a finite number from 0 through 100, `minimumWordLength` a positive integer, and `cadence` one of the listed values. Invalid values throw `TypeError`; they are not silently coerced. For untyped configuration, use `isAnchorOptions(value)` or `assertValidAnchorOptions(value)` before processing.
+
+`shouldAnchorWord` receives the original `word`, a lowercase `normalizedWord`, and a zero-based `index`. It is called only for words that pass the built-in length, cadence, and dictionary checks; return `false` to apply your own additional exclusion rule.
 
 ### Cadence modes
 
@@ -155,6 +161,7 @@ import type {
   ReadingCadence,
   ReadingMetrics,
   TextSegment,
+  WordAnchorContext,
   WordParts,
 } from "@clamly/anchor";
 ```

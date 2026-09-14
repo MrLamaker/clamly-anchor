@@ -1,5 +1,5 @@
 import { SACCADE_STOP_WORDS } from "./constants";
-import type { AnchorOptions, ReadingCadence, ReadingMetrics, TextSegment, WordParts } from "./types";
+import type { AnchorOptions, ReadingCadence, ReadingMetrics, TextSegment, WordAnchorContext, WordParts } from "./types";
 
 const DEFAULT_STRENGTH = 45;
 const DEFAULT_MINIMUM_WORD_LENGTH = 1;
@@ -13,6 +13,8 @@ export interface ResolvedAnchorOptions {
   fixationStrength: number;
   minimumWordLength: number;
   cadence: ReadingCadence;
+  skipWords: ReadonlySet<string>;
+  shouldAnchorWord?: (context: WordAnchorContext) => boolean;
 }
 
 /** Returns whether an unknown value is a valid set of text-processing options. */
@@ -24,13 +26,15 @@ export function isAnchorOptions(value: unknown): value is AnchorOptions {
     (options.fixationStrength === undefined || (typeof options.fixationStrength === "number" && Number.isFinite(options.fixationStrength) && options.fixationStrength >= 0 && options.fixationStrength <= 100))
     && (options.minimumWordLength === undefined || (typeof options.minimumWordLength === "number" && Number.isInteger(options.minimumWordLength) && options.minimumWordLength >= 1))
     && (options.cadence === undefined || options.cadence === "all" || options.cadence === "alternating" || options.cadence === "saccade")
+    && isNonEmptyStringList(options.skipWords)
+    && (options.shouldAnchorWord === undefined || typeof options.shouldAnchorWord === "function")
   );
 }
 
 /** Throws a `TypeError` when values from JavaScript or external config are invalid. */
 export function assertValidAnchorOptions(options: unknown): asserts options is AnchorOptions {
   if (!isAnchorOptions(options)) {
-    throw new TypeError("Invalid Anchor options: fixationStrength must be a finite number from 0 to 100, minimumWordLength must be a positive integer, and cadence must be 'all', 'alternating', or 'saccade'.");
+    throw new TypeError("Invalid Anchor options: fixationStrength must be a finite number from 0 to 100, minimumWordLength must be a positive integer, cadence must be 'all', 'alternating', or 'saccade', skipWords must be an array of non-empty strings, and shouldAnchorWord must be a function.");
   }
 }
 
@@ -40,7 +44,9 @@ export function resolveOptions(options: AnchorOptions = {}): ResolvedAnchorOptio
   return {
     fixationStrength: options.fixationStrength ?? DEFAULT_STRENGTH,
     minimumWordLength: options.minimumWordLength ?? DEFAULT_MINIMUM_WORD_LENGTH,
-    cadence: options.cadence ?? DEFAULT_CADENCE
+    cadence: options.cadence ?? DEFAULT_CADENCE,
+    skipWords: new Set((options.skipWords ?? []).map(normalizeWord)),
+    shouldAnchorWord: options.shouldAnchorWord
   };
 }
 
@@ -50,17 +56,24 @@ export function resolveOptions(options: AnchorOptions = {}): ResolvedAnchorOptio
  */
 export function getWordParts(word: string, options: AnchorOptions = {}): WordParts {
   const resolved = resolveOptions(options);
+  return getWordPartsWithResolvedOptions(word, resolved, 0);
+}
+
+function getWordPartsWithResolvedOptions(word: string, options: ResolvedAnchorOptions, index: number): WordParts {
   const characters = Array.from(word);
+  const normalizedWord = normalizeWord(word);
 
   if (
-    characters.length < resolved.minimumWordLength ||
-    resolved.fixationStrength === 0 ||
-    (resolved.cadence === "saccade" && SACCADE_STOP_WORDS.has(word.toLowerCase()))
+    characters.length < options.minimumWordLength ||
+    options.fixationStrength === 0 ||
+    (options.cadence === "saccade" && SACCADE_STOP_WORDS.has(normalizedWord)) ||
+    options.skipWords.has(normalizedWord) ||
+    options.shouldAnchorWord?.({ word, normalizedWord, index }) === false
   ) {
     return { prefix: "", suffix: word };
   }
 
-  const prefixLength = getPrefixLength(characters.length, resolved.fixationStrength);
+  const prefixLength = getPrefixLength(characters.length, options.fixationStrength);
   return {
     prefix: characters.slice(0, prefixLength).join(""),
     suffix: characters.slice(prefixLength).join("")
@@ -85,7 +98,7 @@ export function splitText(text: string, options: AnchorOptions = {}): TextSegmen
       // In alternating mode, skip odd-indexed words to reduce visual density.
       parts = { prefix: "", suffix: rawWord };
     } else {
-      parts = getWordParts(rawWord, resolved);
+      parts = getWordPartsWithResolvedOptions(rawWord, resolved, wordIndex);
     }
 
     if (parts.prefix) segments.push({ value: parts.prefix, bold: true });
@@ -158,6 +171,14 @@ function getPrefixLength(length: number, strength: number): number {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyStringList(value: unknown): value is readonly string[] | undefined {
+  return value === undefined || (Array.isArray(value) && value.every((item) => typeof item === "string" && item.trim().length > 0));
+}
+
+function normalizeWord(word: string): string {
+  return word.toLowerCase();
 }
 
 function escapeHtml(value: string): string {

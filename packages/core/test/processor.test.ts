@@ -46,6 +46,28 @@ describe("splitText", () => {
     const hasBoldQuick = segments.some((s) => s.bold && s.value === "qu");
     expect(hasBoldQuick).toBe(true);
   });
+
+  it("supports case-insensitive custom word dictionaries", () => {
+    const segments = splitText("API design api", { skipWords: ["api"] });
+    expect(segments.filter((segment) => segment.bold).map((segment) => segment.value)).toEqual(["des"]);
+  });
+
+  it("passes the original word and its index to custom selection policies", () => {
+    const calls: Array<{ word: string; normalizedWord: string; index: number }> = [];
+    const segments = splitText("Anchor only second", {
+      shouldAnchorWord: (context) => {
+        calls.push(context);
+        return context.index === 1;
+      }
+    });
+
+    expect(calls).toEqual([
+      { word: "Anchor", normalizedWord: "anchor", index: 0 },
+      { word: "only", normalizedWord: "only", index: 1 },
+      { word: "second", normalizedWord: "second", index: 2 }
+    ]);
+    expect(segments.filter((segment) => segment.bold).map((segment) => segment.value)).toEqual(["on"]);
+  });
 });
 
 describe("processText", () => {
@@ -58,6 +80,8 @@ describe("option validation", () => {
   it("rejects invalid runtime values instead of coercing them", () => {
     expect(isAnchorOptions({ fixationStrength: 45, minimumWordLength: 2, cadence: "all" })).toBe(true);
     expect(isAnchorOptions({ fixationStrength: 101 })).toBe(false);
+    expect(isAnchorOptions({ skipWords: [""] })).toBe(false);
+    expect(isAnchorOptions({ shouldAnchorWord: true })).toBe(false);
     expect(() => splitText("text", { minimumWordLength: 1.5 })).toThrow(TypeError);
   });
 });

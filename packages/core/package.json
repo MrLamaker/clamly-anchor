@@ -1,6 +1,6 @@
 {
   "name": "@clamly/anchor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Dependency-free text fixation and DOM processing for Clamly Anchor.",
   "license": "MIT",
   "type": "module",
