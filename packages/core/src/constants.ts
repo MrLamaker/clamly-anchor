@@ -1,45 +1,134 @@
-/** Attribute used to identify markup created by Clamly Anchor. */
+import { STOP_WORDS } from "./stopwords";
+
+/** Attribute that marks markup created by Clamly Anchor. */
 export const GENERATED_ATTRIBUTE = "data-clamly-anchor";
 
-/** Tags whose content must never be modified. */
-export const SKIPPED_TAGS = new Set([
+/** Attribute that site owners set to "off" on an element to keep Anchor out of it. */
+export const OPT_OUT_ATTRIBUTE = "data-anchor";
+
+/** Name of the CSS Custom Highlight used by the highlight renderer: style it with `::highlight(clamly-anchor)`. */
+export const HIGHLIGHT_NAME = "clamly-anchor";
+
+/** HTML elements whose content is never modified (uppercase, as `Element.tagName` reports them). */
+export const SKIPPED_TAGS: ReadonlySet<string> = new Set([
   "SCRIPT",
   "STYLE",
+  "NOSCRIPT",
+  "TEMPLATE",
+  "TITLE",
+  "HEAD",
   "CODE",
   "PRE",
-  "SVG",
-  "NOSCRIPT",
+  "KBD",
+  "SAMP",
+  "VAR",
   "TEXTAREA",
   "INPUT",
   "SELECT",
   "OPTION",
+  "OPTGROUP",
+  "DATALIST",
   "BUTTON",
-  "KBD",
-  "SAMP",
-  "MATH",
-  "TEMPLATE",
-  "TITLE",
   "NAV",
-  "DIALOG",
   "MENU",
-  "DETAILS",
-  "SUMMARY"
+  "CANVAS",
+  "VIDEO",
+  "AUDIO",
+  "OBJECT",
+  "EMBED",
+  "IFRAME",
+  "RP",
+  "RT"
 ]);
 
-/** Roles whose content should not be visually modified to avoid breaking complex UI components. */
-export const SKIPPED_ROLES = new Set([
-  "textbox",
-  "navigation",
+/** ARIA roles whose content is never modified: widgets, navigation and live regions. */
+export const SKIPPED_ROLES: ReadonlySet<string> = new Set([
+  "alert",
+  "alertdialog",
+  "application",
+  "button",
+  "checkbox",
+  "code",
+  "combobox",
+  "img",
+  "listbox",
+  "log",
+  "marquee",
+  "math",
   "menu",
   "menubar",
-  "dialog",
-  "alertdialog",
-  "progressbar"
+  "menuitem",
+  "menuitemcheckbox",
+  "menuitemradio",
+  "meter",
+  "navigation",
+  "option",
+  "progressbar",
+  "radio",
+  "scrollbar",
+  "searchbox",
+  "slider",
+  "spinbutton",
+  "status",
+  "switch",
+  "tab",
+  "tablist",
+  "textbox",
+  "timer",
+  "toolbar",
+  "tooltip",
+  "tree",
+  "treeitem"
 ]);
 
-/** Common short grammatical particles that saccade cadence leaves soft to enhance visual rhythm. */
-export const SACCADE_STOP_WORDS = new Set([
-  "a", "an", "the", "and", "or", "but", "if", "so",
-  "in", "on", "at", "to", "of", "by", "for", "as",
-  "is", "it", "be", "we", "he", "my", "up", "do", "no"
+/**
+ * Elements that start a new paragraph-like unit. Words are counted per unit,
+ * so the 'alternating' cadence keeps its rhythm across links and emphasis.
+ */
+export const BLOCK_TAGS: ReadonlySet<string> = new Set([
+  "address",
+  "article",
+  "aside",
+  "blockquote",
+  "body",
+  "caption",
+  "dd",
+  "details",
+  "dialog",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "header",
+  "hgroup",
+  "html",
+  "legend",
+  "li",
+  "main",
+  "ol",
+  "p",
+  "search",
+  "section",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "tr",
+  "ul"
 ]);
+
+/** English stop words used by the 'saccade' cadence when no locale is given. */
+export const SACCADE_STOP_WORDS: ReadonlySet<string> = new Set(STOP_WORDS["en"]);
