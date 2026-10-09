@@ -171,7 +171,7 @@ import type {
 ## Design principles
 
 - **Zero dependencies** — no runtime dependencies whatsoever
-- **Screen-reader safe** — never uses `<strong>`; uses presentational `<b>` with `aria-hidden`
+- **Screen-reader safe** — never uses `<strong>`; uses presentational `<b>` so assistive tech reads each word normally, with no added emphasis
 - **Layout safe** — inline wrappers preserve flex/grid word flow
 - **Idempotent** — `processElement` → `restoreElement` leaves the DOM exactly as it was
 - **Skips interactive regions** — ignores `<code>`, `<pre>`, `<input>`, `<textarea>`, editable regions, and ARIA navigation/menu roles
