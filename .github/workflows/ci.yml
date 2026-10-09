@@ -6,11 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   validate:
-    name: Typecheck, Test & Build
+    name: Lint, typecheck, test and build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -25,28 +27,137 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Typecheck monorepo
+      - name: Lint and formatting (Biome)
+        run: pnpm lint
+
+      - name: Typecheck
         run: pnpm typecheck
 
-      - name: Run unit tests
+      - name: Unit tests
         run: pnpm test
 
-      - name: Build all packages and applications
+      - name: Build packages and apps
         run: pnpm build
+
+      - name: Bundle-size limits
+        run: pnpm check:size
+
+      - name: Published package checks (publint and arethetypeswrong)
+        run: pnpm check:packages
+
+      - name: Validate the Firefox extension (addons-linter)
+        run: npx --yes web-ext@8 lint --source-dir apps/extension/dist-firefox --no-input --warnings-as-errors
+
+  e2e:
+    name: Browser tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    # Playwright's own image: the same browsers, system libraries and fonts on
+    # every run, which the approved screenshots depend on. Keep its version in
+    # step with @playwright/test in e2e/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --user 1001
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    env:
+      ANCHOR_VISUAL: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages, the extension and the documentation site
+        run: pnpm --filter "./packages/*" --filter @clamly/anchor-extension --filter @clamly/anchor-web run build
+
+      - name: Run browser tests
+        run: pnpm test:e2e --project=${{ matrix.browser }}
+
+      # New or changed screenshots fail the run. Render them again here, in the
+      # same image, so they can be reviewed and committed (see CONTRIBUTING.md).
+      - name: Render proposed screenshots
+        if: ${{ failure() }}
+        run: pnpm test:e2e --project=${{ matrix.browser }} --grep @visual --update-snapshots=changed
+
+      - name: Upload proposed screenshots
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: proposed-screenshots-${{ matrix.browser }}
+          path: e2e/tests/__screenshots__
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: e2e/playwright-report
+          retention-days: 14
+
+  edge:
+    name: Extension in Microsoft Edge
+    # GitHub's Ubuntu runners come with Microsoft Edge installed.
+    runs-on: ubuntu-latest
+    env:
+      ANCHOR_E2E_EDGE: "1"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Make sure Microsoft Edge is installed
+        run: |
+          if [ ! -x /opt/microsoft/msedge/msedge ]; then
+            pnpm --filter @clamly/anchor-e2e exec playwright install --with-deps msedge
+          fi
+          /opt/microsoft/msedge/msedge --version
+
+      - name: Build packages and the extension
+        run: pnpm --filter "./packages/*" --filter @clamly/anchor-extension run build
+
+      - name: Run the extension tests in Edge
+        run: pnpm test:e2e --project=edge
+
+      - name: Upload test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-edge
+          path: e2e/playwright-report
+          retention-days: 14
