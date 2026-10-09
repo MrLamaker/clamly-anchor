@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Large page fixture</title>
+    <style>
+      body {
+        max-width: 720px;
+        margin: 24px auto;
+        font: 16px/1.6 system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main"></main>
+    <script type="module">
+      import * as anchor from "@clamly/anchor";
+
+      // 3,000 paragraphs of 20 words: 60,000 words, a very long article.
+      const words = "reading dense material asks a lot of attention especially in long technical documents with many unfamiliar terms".split(" ");
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < 3000; i++) {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = `${Array.from({ length: 20 }, (_, j) => words[(i + j) % words.length]).join(" ")}.`;
+        fragment.append(paragraph);
+      }
+      document.getElementById("main").append(fragment);
+      window.anchorApi = anchor;
+      window.ready = true;
+    </script>
+  </body>
+</html>

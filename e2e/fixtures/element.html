@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Web component fixture</title>
+    <script src="/anchor.global.js"></script>
+  </head>
+  <body>
+    <clamly-anchor id="element" renderer="dom">
+      <p id="text">Element content gets anchors too.</p>
+    </clamly-anchor>
+    <script>
+      window.ready = typeof ClamlyAnchor === "object" && customElements.get("clamly-anchor") !== undefined;
+    </script>
+  </body>
+</html>

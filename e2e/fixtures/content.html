@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anchor content fixture</title>
+    <style>
+      body {
+        max-width: 720px;
+        margin: 24px auto;
+        color: #222222;
+        background: #ffffff;
+        font: 16px/1.6 system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Main">
+        <a href="#reading">Home</a>
+        <a href="#results">Docs</a>
+      </nav>
+    </header>
+    <main id="main">
+      <article>
+        <h1>Reading dense material</h1>
+        <p id="latin">Reading dense material asks a lot of attention, especially in long technical documents with unfamiliar terms.</p>
+        <p id="inline">Links <a href="#reading">inside a paragraph</a> and <em>emphasis</em> keep working as before.</p>
+        <ul>
+          <li>First list item text</li>
+          <li>Second list item text</li>
+        </ul>
+        <table>
+          <caption>Results table</caption>
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Alpha reading</td>
+              <td>Forty two</td>
+            </tr>
+          </tbody>
+        </table>
+        <pre><code>const untouched = true;</code></pre>
+        <form>
+          <label for="name">Your name</label>
+          <input id="name" value="Typed value" />
+          <button type="button">Submit button</button>
+        </form>
+        <p id="live" aria-live="polite">Live region text</p>
+        <div id="editable" contenteditable="true">Editable text stays as it is</div>
+        <svg width="220" height="24" role="img" aria-label="Chart label text"><text x="0" y="16">Chart label text</text></svg>
+        <p id="devanagari" lang="hi">हिन्दी भाषा में एक छोटा अनुच्छेद।</p>
+        <p id="arabic" lang="ar" dir="rtl">مرحبا بالعالم، هذه فقرة عربية قصيرة.</p>
+        <p id="cjk" lang="zh">我喜欢学习中文，因为它很有意思。</p>
+        <p id="thai" lang="th">ภาษาไทยเป็นภาษาที่สวยงามมาก</p>
+        <p id="optout" data-anchor="off">Opted out paragraph text</p>
+      </article>
+    </main>
+    <script type="module">
+      import * as anchor from "@clamly/anchor";
+
+      window.anchorApi = anchor;
+      window.ready = true;
+    </script>
+  </body>
+</html>
