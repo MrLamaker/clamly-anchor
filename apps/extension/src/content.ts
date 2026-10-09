@@ -50,6 +50,7 @@ function isCurrentSiteActive(): boolean {
     href.startsWith("edge://") ||
     href.startsWith("about:") ||
     href.startsWith("view-source:") ||
+    href.startsWith("devtools://") ||
     href.includes("chromewebstore.google.com") ||
     href.includes("chrome.google.com/webstore")
   ) {

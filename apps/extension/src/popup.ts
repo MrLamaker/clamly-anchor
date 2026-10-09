@@ -135,13 +135,19 @@ function render(settings: AnchorSettings): void {
     siteStatusDot.className = `site-status-dot ${activeOnThisSite ? "active" : ""}`;
     siteStatusText.textContent = activeOnThisSite
       ? "Anchor active on this page"
-      : settings.enabled
-        ? "Excluded for this site"
-        : "Reader paused";
+      : !settings.enabled
+        ? "Reader paused"
+        : settings.siteMode === "selective"
+          ? "Not enabled for this site"
+          : "Excluded for this site";
 
     siteToggleBtn.disabled = !settings.enabled;
     siteToggleBtn.className = `site-toggle-btn ${activeOnThisSite ? "active" : ""}`;
-    siteToggleBtn.textContent = activeOnThisSite ? "Active" : "Excluded";
+    siteToggleBtn.textContent = activeOnThisSite
+      ? "Active"
+      : settings.siteMode === "selective"
+        ? "Off"
+        : "Excluded";
   }
 }
 

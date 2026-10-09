@@ -74,16 +74,11 @@ export function isSiteActive(settings: AnchorSettings, urlString?: string): bool
 /** Toggles whether the given domain is active. Returns updated settings. */
 export function toggleDomainActive(settings: AnchorSettings, domain: string): AnchorSettings {
   if (!domain) return settings;
-  const exists = settings.customSites.includes(domain);
-  let nextSites: string[];
-
-  if (settings.siteMode === "all") {
-    // In "all" mode, customSites is the exclusion blocklist
-    nextSites = exists ? settings.customSites.filter((s) => s !== domain) : [...settings.customSites, domain];
-  } else {
-    // In "selective" mode, customSites is the allowlist
-    nextSites = exists ? settings.customSites.filter((s) => s !== domain) : [...settings.customSites, domain];
-  }
+  // customSites is the blocklist in "all" mode and the allowlist in "selective" mode;
+  // either way, toggling a site flips its membership.
+  const nextSites = settings.customSites.includes(domain)
+    ? settings.customSites.filter((s) => s !== domain)
+    : [...settings.customSites, domain];
 
   return {
     ...settings,
