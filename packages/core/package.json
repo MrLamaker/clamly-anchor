@@ -1,6 +1,6 @@
 {
   "name": "@clamly/anchor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Reading anchors (bionic-style fixation points) for any website: no DOM changes with the CSS Highlight API, safe with React and Vue, SSR-friendly, zero dependencies.",
   "keywords": [
     "reading",

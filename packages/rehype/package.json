@@ -1,6 +1,6 @@
 {
   "name": "@clamly/rehype-anchor",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "rehype plugin that adds Clamly Anchor reading anchors to Markdown, MDX and HTML at build time: no client JavaScript.",
   "keywords": [
     "reading",
