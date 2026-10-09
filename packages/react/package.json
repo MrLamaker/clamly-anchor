@@ -1,0 +1,76 @@
+{
+  "name": "@clamly/anchor-react",
+  "version": "0.0.0",
+  "description": "React components and a hook for Clamly Anchor reading anchors: server-rendered <AnchorText> and useAnchor, safe with React's DOM.",
+  "keywords": [
+    "reading",
+    "accessibility",
+    "a11y",
+    "adhd",
+    "dyslexia",
+    "bionic-reading",
+    "clamly-anchor",
+    "react",
+    "react-component",
+    "hooks"
+  ],
+  "homepage": "https://github.com/MrLamaker/clamly-anchor/tree/main/packages/react#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLamaker/clamly-anchor.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLamaker/clamly-anchor/issues"
+  },
+  "author": "Clamly (https://clamly.app)",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "test": "vitest run",
+    "check:package": "publint --strict && attw --pack . --profile node16"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@clamly/anchor": "workspace:^"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "jsdom": "^30.0.1",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

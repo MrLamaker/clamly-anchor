@@ -1,0 +1,74 @@
+{
+  "name": "@clamly/anchor-vue",
+  "version": "0.0.0",
+  "description": "Vue 3 component, directive and composable for Clamly Anchor reading anchors: SSR-safe <AnchorText> and v-anchor.",
+  "keywords": [
+    "reading",
+    "accessibility",
+    "a11y",
+    "adhd",
+    "dyslexia",
+    "bionic-reading",
+    "clamly-anchor",
+    "vue",
+    "vue3",
+    "directive",
+    "composable"
+  ],
+  "homepage": "https://github.com/MrLamaker/clamly-anchor/tree/main/packages/vue#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLamaker/clamly-anchor.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLamaker/clamly-anchor/issues"
+  },
+  "author": "Clamly (https://clamly.app)",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "test": "vitest run",
+    "check:package": "publint --strict && attw --pack . --profile node16"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "dependencies": {
+    "@clamly/anchor": "workspace:^"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "jsdom": "^30.0.1",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0",
+    "vue": "^3.5.43"
+  }
+}

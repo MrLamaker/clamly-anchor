@@ -1,0 +1,75 @@
+{
+  "name": "@clamly/rehype-anchor",
+  "version": "0.0.0",
+  "description": "rehype plugin that adds Clamly Anchor reading anchors to Markdown, MDX and HTML at build time: no client JavaScript.",
+  "keywords": [
+    "reading",
+    "accessibility",
+    "a11y",
+    "adhd",
+    "dyslexia",
+    "bionic-reading",
+    "clamly-anchor",
+    "unified",
+    "rehype",
+    "rehype-plugin",
+    "mdx",
+    "markdown",
+    "hast"
+  ],
+  "homepage": "https://github.com/MrLamaker/clamly-anchor/tree/main/packages/rehype#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLamaker/clamly-anchor.git",
+    "directory": "packages/rehype"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLamaker/clamly-anchor/issues"
+  },
+  "author": "Clamly (https://clamly.app)",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "test": "vitest run",
+    "check:package": "publint --strict && attw --pack . --profile node16"
+  },
+  "dependencies": {
+    "@clamly/anchor": "workspace:^",
+    "@types/hast": "^3.0.5"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "publint": "^0.3.25",
+    "rehype-parse": "^9.0.1",
+    "rehype-stringify": "^10.0.1",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "unified": "^11.0.5",
+    "vitest": "^5.0.0"
+  }
+}

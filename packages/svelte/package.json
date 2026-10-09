@@ -1,0 +1,67 @@
+{
+  "name": "@clamly/anchor-svelte",
+  "version": "0.0.0",
+  "description": "Svelte 5 component and action for Clamly Anchor reading anchors: SSR-safe <AnchorText> and use:anchor.",
+  "keywords": [
+    "reading",
+    "accessibility",
+    "a11y",
+    "adhd",
+    "dyslexia",
+    "bionic-reading",
+    "clamly-anchor",
+    "svelte",
+    "sveltekit",
+    "svelte-action"
+  ],
+  "homepage": "https://github.com/MrLamaker/clamly-anchor/tree/main/packages/svelte#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLamaker/clamly-anchor.git",
+    "directory": "packages/svelte"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLamaker/clamly-anchor/issues"
+  },
+  "author": "Clamly (https://clamly.app)",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && node scripts/copy-svelte.mjs",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "test": "vitest run",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "dependencies": {
+    "@clamly/anchor": "workspace:^"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "jsdom": "^30.0.1",
+    "publint": "^0.3.25",
+    "svelte": "^5.57.2",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}
