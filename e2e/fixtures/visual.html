@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anchor visual fixture</title>
+    <style>
+      /* Every script has a bundled font, so screenshots never depend on the system's fonts. */
+      body {
+        width: 640px;
+        margin: 0;
+        padding: 16px;
+        color: #1f1f1f;
+        background: #ffffff;
+      }
+      section {
+        padding: 8px 12px;
+        font-size: 20px;
+        line-height: 1.6;
+      }
+      p {
+        margin: 0;
+      }
+      #latin {
+        font-family: "Noto Sans Variable", sans-serif;
+      }
+      #devanagari {
+        font-family: "Noto Sans Devanagari Variable", sans-serif;
+      }
+      #arabic {
+        font-family: "Noto Sans Arabic Variable", sans-serif;
+      }
+      #japanese {
+        font-family: "Noto Sans JP Variable", sans-serif;
+      }
+      #thai {
+        font-family: "Noto Sans Thai Variable", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section id="latin" lang="en">
+        <p>Reading dense material asks a lot of attention. Naïve café owners coöperate on well-known, long-term plans.</p>
+      </section>
+      <section id="devanagari" lang="hi">
+        <p>हिन्दी भाषा में एक छोटा अनुच्छेद, जिसमें संयुक्ताक्षर और मात्राएँ हैं।</p>
+      </section>
+      <section id="arabic" lang="ar" dir="rtl">
+        <p>مرحبا بالعالم، هذه فقرة عربية قصيرة تختبر اتصال الحروف.</p>
+      </section>
+      <section id="japanese" lang="ja">
+        <p>日本語の文章は単語の間に空白を入れません。</p>
+      </section>
+      <section id="thai" lang="th">
+        <p>ภาษาไทยเป็นภาษาที่สวยงามมาก และไม่เว้นวรรคระหว่างคำ</p>
+      </section>
+    </main>
+    <script type="module" src="./visual.ts"></script>
+  </body>
+</html>

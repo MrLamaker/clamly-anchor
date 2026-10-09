@@ -1,35 +1,103 @@
 {
   "name": "@clamly/anchor",
   "version": "0.2.0",
-  "description": "Dependency-free text fixation and DOM processing for Clamly Anchor.",
+  "description": "Reading anchors (bionic-style fixation points) for any website: no DOM changes with the CSS Highlight API, safe with React and Vue, SSR-friendly, zero dependencies.",
+  "keywords": [
+    "reading",
+    "accessibility",
+    "a11y",
+    "adhd",
+    "dyslexia",
+    "bionic-reading",
+    "fixation",
+    "focus",
+    "typography",
+    "css-highlight-api"
+  ],
+  "homepage": "https://github.com/MrLamaker/clamly-anchor/tree/main/packages/core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLamaker/clamly-anchor.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLamaker/clamly-anchor/issues"
+  },
+  "author": "Clamly (https://clamly.app)",
   "license": "MIT",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css",
+    "./dist/element.js",
+    "./dist/element.cjs",
+    "./dist/*.global.js"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.cts",
+  "unpkg": "./dist/anchor.global.js",
+  "jsdelivr": "./dist/anchor.global.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./element": {
+      "import": {
+        "types": "./dist/element.d.ts",
+        "default": "./dist/element.js"
+      },
+      "require": {
+        "types": "./dist/element.d.cts",
+        "default": "./dist/element.cjs"
+      }
+    },
+    "./toggle": {
+      "import": {
+        "types": "./dist/toggle.d.ts",
+        "default": "./dist/toggle.js"
+      },
+      "require": {
+        "types": "./dist/toggle.d.cts",
+        "default": "./dist/toggle.cjs"
+      }
+    },
+    "./styles.css": "./dist/styles.css",
+    "./anchor.global.js": "./dist/anchor.global.js",
+    "./anchor.auto.global.js": "./dist/anchor.auto.global.js",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "build": "node scripts/clean.mjs && tsdown && node scripts/write-css.mjs",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
+    "test": "vitest run",
+    "check:package": "publint --strict && attw --pack . --profile node16 --exclude-entrypoints ./styles.css ./anchor.global.js ./anchor.auto.global.js"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "jsdom": "^30.0.1",
-    "tsup": "^8.5.1",
+    "publint": "^0.3.25",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }

@@ -5,9 +5,17 @@
       "commands": ["pnpm install"]
     },
     "build": {
-      "inputs": [{ "step": "install" }],
-      "commands": ["pnpm --filter @clamly/anchor-web build"],
-      "deployOutputs": [{ "include": ["."] }]
+      "inputs": [
+        {
+          "step": "install"
+        }
+      ],
+      "commands": ["pnpm --filter \"@clamly/anchor-web...\" run build"],
+      "deployOutputs": [
+        {
+          "include": ["."]
+        }
+      ]
     }
   },
   "deploy": {

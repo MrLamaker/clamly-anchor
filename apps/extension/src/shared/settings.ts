@@ -5,88 +5,168 @@ export interface AnchorSettings {
   fixationStrength: number;
   cadence: ReadingCadence;
   focusRuler: boolean;
+  /** "all": active everywhere except `customSites`. "selective": active only on `customSites`. */
   siteMode: "all" | "selective";
+  /** Hostnames without "www.". Each entry also covers its subdomains. */
   customSites: string[];
+  /** Strength for particular sites, overriding `fixationStrength` there. */
+  siteStrength: Record<string, number>;
+  /** More space between lines, letters, words and paragraphs (the WCAG 1.4.12 text-spacing values). */
+  extraSpacing: boolean;
+  /** Atkinson Hyperlegible Next for text in Latin script. */
+  readableFont: boolean;
 }
 
-export const DEFAULT_SETTINGS: AnchorSettings = {
+/** Above this share a word is almost entirely bold, which defeats the purpose. */
+export const MAX_FIXATION_STRENGTH = 80;
+/** Sync storage allows 8 KB per item; this keeps the per-site map well inside it. */
+export const MAX_SITE_STRENGTHS = 200;
+export const CONTENT_SCRIPT_ID = "clamly-anchor";
+const CADENCES: readonly ReadingCadence[] = ["all", "alternating", "saccade"];
+const HOSTNAME = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$|^\[[0-9a-f:.]+\]$/i;
+
+export const DEFAULT_SETTINGS: AnchorSettings = Object.freeze({
   enabled: false,
   fixationStrength: 45,
   cadence: "all",
   focusRuler: false,
   siteMode: "all",
-  customSites: []
-};
+  customSites: [],
+  siteStrength: {},
+  extraSpacing: false,
+  readableFont: false
+}) as AnchorSettings;
 
-export async function getSettings(): Promise<AnchorSettings> {
-  const stored = await chrome.storage.sync.get<AnchorSettings>(DEFAULT_SETTINGS);
+function clampStrength(value: unknown): number | undefined {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(MAX_FIXATION_STRENGTH, Math.max(0, Math.round(number))) : undefined;
+}
+
+function isHostname(value: unknown): value is string {
+  return typeof value === "string" && HOSTNAME.test(value);
+}
+
+/** Turns whatever is in storage (possibly from an older version) into valid settings. */
+export function normalizeSettings(stored: Partial<Record<keyof AnchorSettings, unknown>>): AnchorSettings {
+  const sites = Array.isArray(stored.customSites) ? stored.customSites : [];
+  const strengths = typeof stored.siteStrength === "object" && stored.siteStrength !== null ? Object.entries(stored.siteStrength) : [];
+  const siteStrength: Record<string, number> = {};
+  // Keep the most recently added entries when there are too many.
+  for (const [site, value] of strengths.slice(-MAX_SITE_STRENGTHS)) {
+    const strength = clampStrength(value);
+    if (isHostname(site) && strength !== undefined) siteStrength[site.toLowerCase()] = strength;
+  }
   return {
-    enabled: Boolean(stored.enabled),
-    fixationStrength: Math.min(80, Math.max(0, Number(stored.fixationStrength ?? 45))),
-    cadence: (["all", "alternating", "saccade"].includes(stored.cadence) ? stored.cadence : "all") as ReadingCadence,
-    focusRuler: Boolean(stored.focusRuler),
+    enabled: stored.enabled === true,
+    fixationStrength: clampStrength(stored.fixationStrength) ?? DEFAULT_SETTINGS.fixationStrength,
+    cadence: CADENCES.find((cadence) => cadence === stored.cadence) ?? DEFAULT_SETTINGS.cadence,
+    focusRuler: stored.focusRuler === true,
     siteMode: stored.siteMode === "selective" ? "selective" : "all",
-    customSites: Array.isArray(stored.customSites) ? stored.customSites : []
+    customSites: Array.from(new Set(sites.filter(isHostname).map((site) => site.toLowerCase()))),
+    siteStrength,
+    extraSpacing: stored.extraSpacing === true,
+    readableFont: stored.readableFont === true
   };
 }
 
-/** Check whether a URL is restricted from extension script injection by browser policy. */
+/** The site entry in `siteStrength` that applies to a URL: the most specific one. */
+export function siteStrengthKey(settings: AnchorSettings, url?: string): string | undefined {
+  const domain = getDomainFromUrl(url);
+  if (!domain) return undefined;
+  let best: string | undefined;
+  for (const site of Object.keys(settings.siteStrength)) {
+    if (isOnSite(domain, site) && (best === undefined || site.length > best.length)) best = site;
+  }
+  return best;
+}
+
+/** The strength to use on a URL: the site's own strength if it has one. */
+export function strengthFor(settings: AnchorSettings, url?: string): number {
+  const key = siteStrengthKey(settings, url);
+  return key === undefined ? settings.fixationStrength : (settings.siteStrength[key] ?? settings.fixationStrength);
+}
+
+export async function getSettings(): Promise<AnchorSettings> {
+  return normalizeSettings(await chrome.storage.sync.get({ ...DEFAULT_SETTINGS }));
+}
+
+export async function saveSettings(update: Partial<AnchorSettings>): Promise<AnchorSettings> {
+  const next = normalizeSettings({ ...(await getSettings()), ...update });
+  await chrome.storage.sync.set(next);
+  return next;
+}
+
+/** Pages where browsers forbid extension scripts. */
 export function isRestrictedUrl(url?: string): boolean {
   if (!url) return true;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return true;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:" && parsed.protocol !== "file:") return true;
+  const host = parsed.hostname;
   return (
-    url.startsWith("chrome://") ||
-    url.startsWith("chrome-extension://") ||
-    url.startsWith("edge://") ||
-    url.startsWith("about:") ||
-    url.startsWith("view-source:") ||
-    url.startsWith("devtools://") ||
-    url.includes("chromewebstore.google.com") ||
-    url.includes("chrome.google.com/webstore")
+    host === "chromewebstore.google.com" ||
+    (host === "chrome.google.com" && parsed.pathname.startsWith("/webstore")) ||
+    host === "microsoftedge.microsoft.com" ||
+    host === "addons.mozilla.org"
   );
 }
 
-/** Extracts the clean domain hostname from a URL. */
+/** The site name shown and stored for a URL: its hostname without "www.". */
 export function getDomainFromUrl(url?: string): string {
   if (!url || isRestrictedUrl(url)) return "";
   try {
-    const parsed = new URL(url);
-    return parsed.hostname.replace(/^www\./, "");
+    return new URL(url).hostname.replace(/^www\./, "").toLowerCase();
   } catch {
     return "";
   }
 }
 
-/** Determines if Anchor should be visually active on the given URL based on settings. */
-export function isSiteActive(settings: AnchorSettings, urlString?: string): boolean {
-  if (!settings.enabled || isRestrictedUrl(urlString)) return false;
-  const domain = getDomainFromUrl(urlString);
-  if (!domain) return settings.siteMode === "all";
-
-  if (settings.siteMode === "all") {
-    // Enabled everywhere except excluded customSites
-    return !settings.customSites.includes(domain);
-  } else {
-    // Selective mode: enabled only for allowed customSites
-    return settings.customSites.includes(domain);
-  }
+/** Whether a hostname is the given site or one of its subdomains. */
+export function isOnSite(hostname: string, site: string): boolean {
+  return hostname === site || hostname.endsWith(`.${site}`);
 }
 
-/** Toggles whether the given domain is active. Returns updated settings. */
+export function isListedSite(settings: AnchorSettings, url?: string): boolean {
+  const domain = getDomainFromUrl(url);
+  return domain !== "" && settings.customSites.some((site) => isOnSite(domain, site));
+}
+
+/** Whether Anchor should be active on a URL. */
+export function isSiteActive(settings: AnchorSettings, url?: string): boolean {
+  if (!settings.enabled || isRestrictedUrl(url)) return false;
+  const listed = isListedSite(settings, url);
+  return settings.siteMode === "all" ? !listed : listed;
+}
+
+/** Adds the site to the list, or removes it and any of its subdomains. */
 export function toggleDomainActive(settings: AnchorSettings, domain: string): AnchorSettings {
   if (!domain) return settings;
-  const exists = settings.customSites.includes(domain);
-  let nextSites: string[];
-
-  if (settings.siteMode === "all") {
-    // In "all" mode, customSites is the exclusion blocklist
-    nextSites = exists ? settings.customSites.filter((s) => s !== domain) : [...settings.customSites, domain];
-  } else {
-    // In "selective" mode, customSites is the allowlist
-    nextSites = exists ? settings.customSites.filter((s) => s !== domain) : [...settings.customSites, domain];
-  }
-
+  const listed = settings.customSites.some((site) => isOnSite(domain, site));
   return {
     ...settings,
-    customSites: nextSites
+    customSites: listed
+      ? settings.customSites.filter((site) => !isOnSite(domain, site) && !isOnSite(site, domain))
+      : [...settings.customSites, domain]
   };
+}
+
+function sitePatterns(site: string): string[] {
+  return [`*://${site}/*`, `*://*.${site}/*`];
+}
+
+/**
+ * The content script registration for the current settings, or null when
+ * Anchor should run nowhere. While Anchor is off no script is injected into
+ * any page, so the extension cannot affect sites at all.
+ */
+export function contentScriptFor(settings: AnchorSettings): chrome.scripting.RegisteredContentScript | null {
+  if (!settings.enabled) return null;
+  const patterns = settings.customSites.flatMap(sitePatterns);
+  const base = { id: CONTENT_SCRIPT_ID, js: ["content.js"], runAt: "document_idle" as const, persistAcrossSessions: true };
+  if (settings.siteMode === "selective") return patterns.length > 0 ? { ...base, matches: patterns } : null;
+  return { ...base, matches: ["<all_urls>"], ...(patterns.length > 0 ? { excludeMatches: patterns } : {}) };
 }

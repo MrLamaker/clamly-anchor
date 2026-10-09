@@ -1,19 +1,28 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+Security fixes are released for the latest minor version of each package.
 
-## Reporting a Vulnerability
+| Package | Supported |
+| --- | --- |
+| `@clamly/anchor` | 0.3.x |
+| `@clamly/anchor-react`, `@clamly/anchor-vue`, `@clamly/anchor-svelte`, `@clamly/rehype-anchor` | 0.1.x |
+| Browser extension | Latest store version |
 
-The Clamly team and Anchor contributors take security and user privacy seriously. Anchor does not collect, track, or transmit any user text or browsing history; all processing occurs locally in-memory within the user's browser runtime.
+## How Anchor handles data
 
-If you believe you have found a security vulnerability in Clamly Anchor, please report it responsibly:
+Anchor runs entirely in the reader's browser. It does not collect, store or send any text, browsing history or analytics. The
+browser extension stores only its own settings (in the browser's extension storage, synced by the browser if the user has sync
+on), and runs on a page only while the user has switched it on for that site. The documentation site's reading self-test keeps
+its results in the browser's local storage.
 
-1. **Do NOT open a public GitHub issue.**
-2. Send an email describing the vulnerability, affected components, and steps to reproduce to `security@clamly.app`.
-3. We will acknowledge receipt within 48 hours and work with you to triage and address the issue before any public disclosure.
+## Reporting a vulnerability
 
-Thank you for helping keep Anchor and our users safe.
+Please report vulnerabilities privately:
+
+1. **Do not open a public GitHub issue.**
+2. Email `security@clamly.app` with a description, the affected package or extension version, and steps to reproduce.
+3. We acknowledge reports within 48 hours and will work with you on a fix before any public disclosure.
+
+Thank you for helping keep Anchor and its users safe.

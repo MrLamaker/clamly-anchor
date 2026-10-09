@@ -2,7 +2,7 @@
   "name": "clamly-anchor",
   "version": "0.2.0",
   "private": true,
-  "description": "An open-source cognitive accessibility reader by Clamly.",
+  "description": "Reading anchors for any website: core library, framework packages, documentation site and browser extension.",
   "packageManager": "pnpm@12.4.1",
   "engines": {
     "node": ">=24 <25",
@@ -10,12 +10,22 @@
   },
   "scripts": {
     "build": "pnpm --recursive run build",
-    "build:extension": "pnpm --filter @clamly/anchor-extension build",
-    "dev:web": "pnpm --filter @clamly/anchor-web dev",
+    "build:extension": "pnpm --filter \"@clamly/anchor-extension...\" run build",
+    "dev:web": "pnpm --filter \"@clamly/anchor-web^...\" run build && pnpm --filter @clamly/anchor-web dev",
     "typecheck": "pnpm --recursive run typecheck",
-    "test": "pnpm --recursive run test"
+    "test": "pnpm --recursive --filter \"!@clamly/anchor-e2e\" run test",
+    "test:e2e": "pnpm --filter @clamly/anchor-e2e run test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check:size": "node scripts/check-size.mjs",
+    "check:packages": "pnpm --filter \"./packages/*\" run check:package",
+    "changeset": "changeset",
+    "release": "pnpm --filter \"./packages/*\" run build && changeset publish"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@changesets/cli": "^3.0.3",
+    "esbuild": "0.28.1",
     "typescript": "^7.0.2"
   }
 }

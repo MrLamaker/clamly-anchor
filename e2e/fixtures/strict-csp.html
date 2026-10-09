@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- As strict as real sites get: no inline styles or scripts, and fonts only from this origin. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self'"
+    />
+    <title>Strict Content-Security-Policy fixture</title>
+    <link rel="stylesheet" href="/strict-csp.css" />
+  </head>
+  <body>
+    <main>
+      <article>
+        <h1>Reading aids on a locked-down page</h1>
+        <p id="prose">Readers who find dense pages tiring can switch on a clearer font and more generous spacing.</p>
+        <pre><code id="code"><span id="token">const</span> untouched = true;</code></pre>
+        <p>Icon: <span id="icon" class="material-icons">home</span></p>
+        <button id="button" type="button">Save changes</button>
+        <p id="arabic" lang="ar" dir="rtl">مرحبا بالعالم، هذه فقرة عربية قصيرة.</p>
+      </article>
+    </main>
+  </body>
+</html>

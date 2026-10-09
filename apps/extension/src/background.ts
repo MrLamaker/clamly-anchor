@@ -1,28 +1,41 @@
-/**
- * Receives the manifest-defined keyboard shortcut outside the page context.
- * Content scripts are not present on tabs that were already open when the
- * extension was installed, so the handler also injects the bundled script.
- */
-chrome.commands.onCommand.addListener((command) => {
-  if (command !== "toggle-anchor") return;
-  void toggleAnchorForActiveTab();
+import { CONTENT_SCRIPT_ID, contentScriptFor, getSettings, isRestrictedUrl, saveSettings } from "./shared/settings";
+
+// Content scripts are registered dynamically, only for the sites where Anchor
+// is active. When Anchor is off, nothing runs on any page.
+let syncing: Promise<void> = Promise.resolve();
+
+function scheduleSync(): void {
+  syncing = syncing.then(syncContentScript).catch((error: unknown) => {
+    console.error("Clamly Anchor could not update its content script.", error);
+  });
+}
+
+async function syncContentScript(): Promise<void> {
+  const script = contentScriptFor(await getSettings());
+  const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [CONTENT_SCRIPT_ID] });
+  if (existing.length > 0) await chrome.scripting.unregisterContentScripts({ ids: [CONTENT_SCRIPT_ID] });
+  if (script) await chrome.scripting.registerContentScripts([script]);
+}
+
+chrome.runtime.onInstalled.addListener(scheduleSync);
+chrome.runtime.onStartup.addListener(scheduleSync);
+chrome.storage.onChanged.addListener((_changes, area) => {
+  if (area === "sync") scheduleSync();
 });
 
-async function toggleAnchorForActiveTab(): Promise<void> {
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "toggle-anchor") void toggleFromShortcut();
+});
+
+async function toggleFromShortcut(): Promise<void> {
+  const settings = await saveSettings({ enabled: !(await getSettings()).enabled });
+  if (!settings.enabled) return; // Open tabs remove their anchors when the setting changes.
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id || isRestrictedUrl(tab.url)) return;
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) return;
-
-    const { enabled = false } = await chrome.storage.sync.get({ enabled: false });
-    await chrome.storage.sync.set({ enabled: !enabled });
-
-    // Safe to call when the declared content script is already installed: its
-    // per-window guard exits before registering duplicate observers/listeners.
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["content.js"]
-    });
+    // Registered scripts only reach pages loaded from now on; cover the current tab immediately.
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
   } catch {
-    // Chrome blocks injection on protected browser and store pages.
+    // The page refused injection (for example a PDF viewer); nothing else to do.
   }
 }

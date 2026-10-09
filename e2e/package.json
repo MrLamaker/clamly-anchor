@@ -1,0 +1,39 @@
+{
+  "name": "@clamly/anchor-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests for Clamly Anchor: frameworks, accessibility, scripts, performance, builds and the extension.",
+  "scripts": {
+    "test": "playwright test",
+    "serve": "vite --config vite.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clamly/anchor": "workspace:*",
+    "@clamly/anchor-react": "workspace:*",
+    "@clamly/anchor-svelte": "workspace:*",
+    "@clamly/anchor-vue": "workspace:*"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@fontsource-variable/noto-sans": "^5.3.0",
+    "@fontsource-variable/noto-sans-arabic": "^5.3.0",
+    "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
+    "@fontsource-variable/noto-sans-jp": "^5.3.0",
+    "@fontsource-variable/noto-sans-thai": "^5.3.0",
+    "@playwright/test": "1.64.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/chrome": "^0.2.9",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "svelte": "^5.57.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vue": "^3.5.43"
+  }
+}

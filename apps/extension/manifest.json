@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Clamly Anchor",
-  "description": "A focused-reading tool that adds visual anchors to dense text.",
-  "version": "0.1.0",
+  "description": "Adds reading anchors to dense text, on the sites you choose. Runs locally and never changes how pages work.",
+  "version": "0.2.0",
   "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "icons": {
@@ -21,22 +21,23 @@
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["fonts/*.woff2"],
+      "matches": ["<all_urls>"],
+      "use_dynamic_url": true
+    }
+  ],
   "commands": {
     "toggle-anchor": {
       "suggested_key": {
-        "default": "Ctrl+Shift+A",
-        "mac": "Command+Shift+A"
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
       },
-      "description": "Toggle Clamly Anchor on current page"
+      "description": "Switch Clamly Anchor on or off"
     }
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ]
+  }
 }

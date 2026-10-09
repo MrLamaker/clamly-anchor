@@ -1,0 +1,27 @@
+# Dependency updates, grouped into one weekly pull request per kind so they are
+# easy to review. CI (including the browser tests) checks each one.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # A Playwright upgrade brings new browser builds. Upgrade it by hand, together
+      # with the container image in ci.yml and the approved screenshots (see
+      # CONTRIBUTING.md), so the grouped updates are not blocked by it.
+      - dependency-name: "@playwright/test"
+    groups:
+      development:
+        dependency-type: development
+      production:
+        dependency-type: production
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
