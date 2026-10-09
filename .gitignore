@@ -54,3 +54,10 @@ Thumbs.db
 # Personal deployment notes (kept out of the public repository)
 RAILWAY-DEPLOYMENT.local.md
 .serena/
+
+# Firefox build of the extension
+apps/extension/dist-firefox/
+
+# Browser test output
+e2e/test-results/
+e2e/playwright-report/
