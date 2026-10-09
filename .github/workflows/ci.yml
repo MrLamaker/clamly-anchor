@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 12.4.1
           run_install: false
@@ -70,10 +70,10 @@ jobs:
       ANCHOR_VISUAL: "1"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 12.4.1
           run_install: false
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload proposed screenshots
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: proposed-screenshots-${{ matrix.browser }}
           path: e2e/tests/__screenshots__
@@ -110,7 +110,7 @@ jobs:
 
       - name: Upload test report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-${{ matrix.browser }}
           path: e2e/playwright-report
@@ -124,10 +124,10 @@ jobs:
       ANCHOR_E2E_EDGE: "1"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 12.4.1
           run_install: false
@@ -156,7 +156,7 @@ jobs:
 
       - name: Upload test report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-edge
           path: e2e/playwright-report
