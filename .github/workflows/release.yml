@@ -1,7 +1,8 @@
 name: Release
 
 # Changesets on main open (or update) a "Release packages" pull request that
-# bumps versions and changelogs. Merging that pull request publishes to npm.
+# bumps versions and changelogs. Merging that pull request publishes the new
+# versions to npm with provenance, then tags them and creates GitHub releases.
 on:
   push:
     branches: [main]
@@ -38,13 +39,13 @@ jobs:
 
       - name: Create release pull request or publish to npm
         uses: changesets/action@v2
+        # The GitHub token comes from the action's github-token input, which defaults to this workflow's token.
         with:
-          version: pnpm changeset version
-          publish: pnpm release
-          title: Release packages
-          commit: Release packages
+          version-script: pnpm changeset version
+          # See the "release" script in package.json: it publishes with provenance and tags what it published.
+          publish-script: pnpm release
+          pr-title: Release packages
+          commit-message: Release packages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # npm reads the token through the .npmrc that actions/setup-node wrote (registry-url above).
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"

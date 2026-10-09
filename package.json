@@ -20,7 +20,7 @@
     "check:size": "node scripts/check-size.mjs",
     "check:packages": "pnpm --filter \"./packages/*\" run check:package",
     "changeset": "changeset",
-    "release": "pnpm --filter \"./packages/*\" run build && changeset publish"
+    "release": "pnpm --filter \"./packages/*\" run build && pnpm --filter \"./packages/*\" publish --provenance --access public --no-git-checks && changeset git-tag"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
