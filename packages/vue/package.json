@@ -1,6 +1,6 @@
 {
   "name": "@clamly/anchor-vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vue 3 component, directive and composable for Clamly Anchor reading anchors: SSR-safe <AnchorText> and v-anchor.",
   "keywords": [
     "reading",

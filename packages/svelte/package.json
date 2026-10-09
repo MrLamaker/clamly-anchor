@@ -1,6 +1,6 @@
 {
   "name": "@clamly/anchor-svelte",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Svelte 5 component and action for Clamly Anchor reading anchors: SSR-safe <AnchorText> and use:anchor.",
   "keywords": [
     "reading",

@@ -1,6 +1,6 @@
 {
   "name": "@clamly/anchor-react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React components and a hook for Clamly Anchor reading anchors: server-rendered <AnchorText> and useAnchor, safe with React's DOM.",
   "keywords": [
     "reading",
