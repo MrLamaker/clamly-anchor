@@ -12,85 +12,95 @@
           <p class="brand">clamly</p>
           <p class="product">Anchor</p>
         </div>
-        <kbd class="shortcut-pill" title="Toggle Anchor shortcut">Ctrl+Shift+A</kbd>
+        <kbd id="shortcut" class="shortcut-pill" title="Keyboard shortcut to switch Anchor on or off" hidden></kbd>
       </header>
 
-      <!-- Active Domain / Restricted Tab Badge -->
-      <section id="site-card" class="site-card">
+      <section id="site-card" class="site-card" aria-label="This site">
         <div class="site-info">
-          <span id="site-status-dot" class="site-status-dot active"></span>
+          <span id="site-status-dot" class="site-status-dot" aria-hidden="true"></span>
           <div class="site-labels">
-            <strong id="site-domain">Active site</strong>
-            <small id="site-status-text">Anchor active on this page</small>
+            <strong id="site-domain">This page</strong>
+            <small id="site-status-text">Reader paused</small>
           </div>
         </div>
-        <button type="button" id="site-toggle-btn" class="site-toggle-btn" aria-label="Toggle Anchor for this site">
-          Active
-        </button>
+        <button type="button" id="site-toggle-btn" class="site-toggle-btn" aria-describedby="site-domain">Excluded</button>
       </section>
 
-      <!-- Restricted Page Warning -->
       <div id="restricted-notice" class="restricted-notice" hidden>
-        <strong>Browser Protected Page</strong>
-        <p>Chrome prevents extensions from running on system, store, and extension pages for security.</p>
+        <strong>Protected page</strong>
+        <p>Browsers do not let extensions run on system, store and extension pages.</p>
       </div>
 
-      <section class="popup-controls" aria-label="Anchor controls">
-        <!-- Master Enable Switch -->
-        <label class="toggle-row" for="enabled">
+      <section class="popup-controls" aria-label="Anchor settings">
+        <div class="toggle-row">
           <span>
-            <strong>Reader Active</strong>
+            <strong id="enabled-label">Reading anchors</strong>
             <small id="toggle-state">Off</small>
           </span>
-          <input id="enabled" type="checkbox" role="switch" />
-          <span class="toggle-visual" aria-hidden="true"><i></i></span>
-        </label>
-
-        <!-- Cadence Strategy Selector -->
-        <div class="control-section">
-          <div class="control-heading">
-            <span class="control-label">Reading Cadence</span>
-          </div>
-          <div class="cadence-selector" role="radiogroup" aria-label="Reading Cadence">
-            <button type="button" class="cadence-pill" data-cadence="all" role="radio" aria-checked="true">
-              Every Word
-            </button>
-            <button type="button" class="cadence-pill active" data-cadence="saccade" role="radio" aria-checked="false">
-              Saccade
-            </button>
-            <button type="button" class="cadence-pill" data-cadence="alternating" role="radio" aria-checked="false">
-              Alternating
-            </button>
-          </div>
-          <p class="control-hint" id="cadence-hint">Saccade: Prioritizes content words and keeps stop words soft.</p>
+          <button id="enabled" type="button" role="switch" aria-checked="false" aria-labelledby="enabled-label" class="switch">
+            <span aria-hidden="true"></span>
+          </button>
         </div>
 
-        <!-- Fixation Strength Slider -->
-        <div class="control-section strength-control">
+        <fieldset class="control-section">
+          <legend class="control-label">Cadence</legend>
+          <div class="cadence-selector">
+            <label class="cadence-pill"><input type="radio" name="cadence" value="all" checked /><span>Every word</span></label>
+            <label class="cadence-pill"><input type="radio" name="cadence" value="saccade" /><span>Saccade</span></label>
+            <label class="cadence-pill"><input type="radio" name="cadence" value="alternating" /><span>Alternating</span></label>
+          </div>
+          <p class="control-hint" id="cadence-hint">Every Word: anchors every eligible word.</p>
+        </fieldset>
+
+        <div class="control-section">
           <div class="control-heading">
-            <label for="fixation-strength" class="control-label">Fixation Strength</label>
+            <label for="fixation-strength" class="control-label">Strength</label>
             <output id="strength-value" for="fixation-strength">45%</output>
           </div>
           <input id="fixation-strength" class="strength-range" type="range" min="0" max="80" value="45" />
-          <p class="control-hint">Portion of each anchored word highlighted.</p>
+          <label class="checkbox-row" id="site-strength-row">
+            <input id="site-strength" type="checkbox" />
+            <span>Only on <span id="site-strength-domain">this site</span></span>
+          </label>
+          <p class="control-hint">How much of each word is bold.</p>
         </div>
 
-        <!-- Focus Ruler Toggle -->
-        <label class="toggle-row ruler-row" for="focus-ruler">
+        <div class="toggle-row">
           <span>
-            <strong>Reading Focus Ruler</strong>
-            <small>Translucent guide follows your reading line</small>
+            <strong id="font-label">Readable font</strong>
+            <small id="font-hint">Atkinson Hyperlegible: letters that are hard to mix up</small>
           </span>
-          <input id="focus-ruler" type="checkbox" role="switch" />
-          <span class="toggle-visual" aria-hidden="true"><i></i></span>
-        </label>
+          <button id="readable-font" type="button" role="switch" aria-checked="false" aria-labelledby="font-label" aria-describedby="font-hint" class="switch">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="toggle-row">
+          <span>
+            <strong id="spacing-label">Extra text spacing</strong>
+            <small id="spacing-hint">More space between lines, letters and words</small>
+          </span>
+          <button id="extra-spacing" type="button" role="switch" aria-checked="false" aria-labelledby="spacing-label" aria-describedby="spacing-hint" class="switch">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="toggle-row">
+          <span>
+            <strong id="ruler-label">Reading ruler</strong>
+            <small id="ruler-hint">A band that follows your pointer</small>
+          </span>
+          <button id="focus-ruler" type="button" role="switch" aria-checked="false" aria-labelledby="ruler-label" aria-describedby="ruler-hint" class="switch">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
       </section>
 
       <p id="popup-notice" class="popup-notice" role="status" hidden></p>
 
       <footer class="popup-footer">
-        <span>Clamly Anchor is open source</span>
-        <a href="https://clamly.app" target="_blank" rel="noopener noreferrer">clamly.app</a>
+        <span>Runs locally. Collects nothing.</span>
+        <a href="https://github.com/MrLamaker/clamly-anchor" target="_blank" rel="noopener noreferrer">Source code</a>
       </footer>
     </main>
     <script type="module" src="/src/popup.ts"></script>

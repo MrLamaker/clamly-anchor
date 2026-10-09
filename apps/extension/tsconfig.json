@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["chrome"]
+    "types": ["chrome"],
+    "paths": {
+      "@clamly/anchor": ["../../packages/core/src/index.ts"]
+    }
   },
-  "include": ["src/**/*.ts", "vite.config.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "vite.config.ts", "vite.content.config.ts"]
 }

@@ -1,23 +1,31 @@
 import "./popup.css";
+import type { ReadingCadence } from "@clamly/anchor";
 import {
-  DEFAULT_SETTINGS,
+  type AnchorSettings,
   getDomainFromUrl,
   getSettings,
   isRestrictedUrl,
   isSiteActive,
-  toggleDomainActive,
-  type AnchorSettings
+  saveSettings,
+  siteStrengthKey,
+  strengthFor,
+  toggleDomainActive
 } from "./shared/settings";
-import type { ReadingCadence } from "@clamly/anchor";
 
-const enabledInput = requiredElement<HTMLInputElement>("#enabled");
+const enabledSwitch = requiredElement<HTMLButtonElement>("#enabled");
+const toggleState = requiredElement<HTMLElement>("#toggle-state");
 const strengthInput = requiredElement<HTMLInputElement>("#fixation-strength");
 const strengthValue = requiredElement<HTMLOutputElement>("#strength-value");
-const toggleState = requiredElement<HTMLElement>("#toggle-state");
-const focusRulerInput = requiredElement<HTMLInputElement>("#focus-ruler");
+const siteStrengthRow = requiredElement<HTMLElement>("#site-strength-row");
+const siteStrengthInput = requiredElement<HTMLInputElement>("#site-strength");
+const siteStrengthDomain = requiredElement<HTMLElement>("#site-strength-domain");
+const fontSwitch = requiredElement<HTMLButtonElement>("#readable-font");
+const spacingSwitch = requiredElement<HTMLButtonElement>("#extra-spacing");
+const rulerSwitch = requiredElement<HTMLButtonElement>("#focus-ruler");
+const cadenceInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="cadence"]'));
+const cadenceHint = requiredElement<HTMLElement>("#cadence-hint");
 const notice = requiredElement<HTMLElement>("#popup-notice");
-
-// Site domain elements
+const shortcut = requiredElement<HTMLElement>("#shortcut");
 const siteCard = requiredElement<HTMLElement>("#site-card");
 const siteDomain = requiredElement<HTMLElement>("#site-domain");
 const siteStatusDot = requiredElement<HTMLElement>("#site-status-dot");
@@ -25,153 +33,175 @@ const siteStatusText = requiredElement<HTMLElement>("#site-status-text");
 const siteToggleBtn = requiredElement<HTMLButtonElement>("#site-toggle-btn");
 const restrictedNotice = requiredElement<HTMLElement>("#restricted-notice");
 
-// Cadence pills
-const cadencePills = Array.from(document.querySelectorAll<HTMLButtonElement>(".cadence-pill"));
-const cadenceHint = requiredElement<HTMLElement>("#cadence-hint");
-
-let currentTabUrl: string | undefined;
-let currentDomain: string = "";
-let isRestricted: boolean = false;
-let strengthSaveTimeout: number | undefined;
-
 const CADENCE_HINTS: Record<ReadingCadence, string> = {
-  all: "Every Word: Highlights fixation points across all eligible words.",
-  saccade: "Saccade: Prioritizes content words and keeps stop words soft.",
-  alternating: "Alternating: Anchors every other word for an airy, rhythmic flow."
+  all: "Every Word: anchors every eligible word.",
+  saccade: "Saccade: leaves short function words like “the” and “of” unanchored.",
+  alternating: "Alternating: anchors every other word in a paragraph for a lighter page."
 };
 
+let currentTabId: number | undefined;
+let currentTabUrl: string | undefined;
+let currentDomain = "";
+let isRestricted = false;
+let latest: AnchorSettings | undefined;
+let strengthSaveTimeout: number | undefined;
+
 void hydrate().catch(() => {
-  showNotice("Anchor could not access this browser tab. Try reloading the extension.");
+  showNotice("Anchor could not read this tab. Try reloading the extension.");
 });
 
 async function hydrate(): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  currentTabId = tab?.id;
   currentTabUrl = tab?.url;
   isRestricted = isRestrictedUrl(currentTabUrl);
   currentDomain = getDomainFromUrl(currentTabUrl);
-
-  const settings = await getSettings();
-  render(settings);
+  render(await getSettings());
+  void showShortcut();
 }
 
-enabledInput.addEventListener("change", () => void save({ enabled: enabledInput.checked }));
+/** Shows the shortcut the user actually has, which they may have changed or removed. */
+async function showShortcut(): Promise<void> {
+  try {
+    const commands = await chrome.commands.getAll();
+    const keys = commands.find((command) => command.name === "toggle-anchor")?.shortcut;
+    if (keys) {
+      shortcut.textContent = keys;
+      shortcut.hidden = false;
+    }
+  } catch {
+    // Some browsers do not expose commands to the popup; the badge stays hidden.
+  }
+}
 
-strengthInput.addEventListener("input", () => {
-  strengthValue.value = `${strengthInput.value}%`;
-  const fixationStrength = Number(strengthInput.value);
+const flip = (button: HTMLButtonElement): boolean => button.getAttribute("aria-checked") !== "true";
 
-  // Sync storage permits only a limited number of writes. A range input can
-  // emit dozens of events during one drag, so save the final value after the
-  // user pauses while keeping the visual value responsive.
-  if (strengthSaveTimeout !== undefined) clearTimeout(strengthSaveTimeout);
-  strengthSaveTimeout = window.setTimeout(() => {
-    strengthSaveTimeout = undefined;
-    void save({ fixationStrength });
-  }, 800);
-});
+enabledSwitch.addEventListener("click", () => void save({ enabled: flip(enabledSwitch) }));
+fontSwitch.addEventListener("click", () => void save({ readableFont: flip(fontSwitch) }));
+spacingSwitch.addEventListener("click", () => void save({ extraSpacing: flip(spacingSwitch) }));
+rulerSwitch.addEventListener("click", () => void save({ focusRuler: flip(rulerSwitch) }));
 
-focusRulerInput.addEventListener("change", () => {
-  void save({ focusRuler: focusRulerInput.checked });
-});
-
-for (const pill of cadencePills) {
-  pill.addEventListener("click", () => {
-    const cadence = pill.dataset.cadence as ReadingCadence;
-    if (cadence) void save({ cadence });
+for (const input of cadenceInputs) {
+  input.addEventListener("change", () => {
+    if (input.checked) void save({ cadence: input.value as ReadingCadence });
   });
 }
 
+strengthInput.addEventListener("input", () => {
+  strengthValue.value = `${strengthInput.value}%`;
+  const value = Number(strengthInput.value);
+  // Sync storage allows a limited number of writes per minute, and a range input
+  // fires dozens of events per drag: save once the user pauses.
+  if (strengthSaveTimeout !== undefined) clearTimeout(strengthSaveTimeout);
+  strengthSaveTimeout = window.setTimeout(() => {
+    strengthSaveTimeout = undefined;
+    void saveStrength(value);
+  }, 400);
+});
+
+siteStrengthInput.addEventListener("change", () => {
+  const settings = latest;
+  if (!settings || !currentDomain) return;
+  const siteStrength = { ...settings.siteStrength };
+  if (siteStrengthInput.checked) {
+    siteStrength[currentDomain] = Number(strengthInput.value);
+  } else {
+    const key = siteStrengthKey(settings, currentTabUrl);
+    if (key) delete siteStrength[key];
+  }
+  void save({ siteStrength });
+});
+
 siteToggleBtn.addEventListener("click", async () => {
   if (!currentDomain || isRestricted) return;
-  const current = await getSettings();
-  const next = toggleDomainActive(current, currentDomain);
-  await save(next);
+  const next = toggleDomainActive(await getSettings(), currentDomain);
+  await save({ customSites: next.customSites });
 });
+
+/** Saves the strength for this site if it has its own, otherwise for every site. */
+async function saveStrength(value: number): Promise<void> {
+  const settings = latest ?? (await getSettings());
+  const key = siteStrengthKey(settings, currentTabUrl);
+  if (key) await save({ siteStrength: { ...settings.siteStrength, [key]: value } });
+  else await save({ fixationStrength: value });
+}
 
 async function save(update: Partial<AnchorSettings>): Promise<void> {
   try {
-    const next: AnchorSettings = { ...DEFAULT_SETTINGS, ...(await getSettings()), ...update };
-    await chrome.storage.sync.set(next);
-    render(next);
-    await updateCurrentTab(next);
+    // Open tabs and the background worker react to the storage change themselves.
+    const settings = await saveSettings(update);
+    render(settings);
+    await ensureContentScript(settings);
   } catch {
     showNotice("Could not save this setting. Please try again in a moment.");
   }
 }
 
-function render(settings: AnchorSettings): void {
-  // Master switches
-  enabledInput.checked = settings.enabled;
-  toggleState.textContent = settings.enabled ? "On" : "Off";
-
-  // Strength
-  strengthInput.value = String(settings.fixationStrength);
-  strengthInput.disabled = !settings.enabled;
-  strengthValue.value = `${settings.fixationStrength}%`;
-
-  // Focus ruler
-  focusRulerInput.checked = settings.focusRuler;
-  focusRulerInput.disabled = !settings.enabled;
-
-  // Cadence pills
-  for (const pill of cadencePills) {
-    const isActive = pill.dataset.cadence === settings.cadence;
-    pill.classList.toggle("active", isActive);
-    pill.setAttribute("aria-checked", String(isActive));
-    pill.disabled = !settings.enabled;
+/** Tabs opened before Anchor was switched on have no content script yet: add it to this one. */
+async function ensureContentScript(settings: AnchorSettings): Promise<void> {
+  if (currentTabId === undefined || !isSiteActive(settings, currentTabUrl)) {
+    showNotice("");
+    return;
   }
-  cadenceHint.textContent = CADENCE_HINTS[settings.cadence] ?? CADENCE_HINTS.saccade;
-
-  // Site domain status
-  if (isRestricted) {
-    siteCard.hidden = true;
-    restrictedNotice.hidden = false;
-  } else {
-    restrictedNotice.hidden = true;
-    siteCard.hidden = false;
-    siteDomain.textContent = currentDomain || "Current webpage";
-
-    const activeOnThisSite = isSiteActive(settings, currentTabUrl);
-    siteStatusDot.className = `site-status-dot ${activeOnThisSite ? "active" : ""}`;
-    siteStatusText.textContent = activeOnThisSite
-      ? "Anchor active on this page"
-      : !settings.enabled
-        ? "Reader paused"
-        : settings.siteMode === "selective"
-          ? "Not enabled for this site"
-          : "Excluded for this site";
-
-    siteToggleBtn.disabled = !settings.enabled;
-    siteToggleBtn.className = `site-toggle-btn ${activeOnThisSite ? "active" : ""}`;
-    siteToggleBtn.textContent = activeOnThisSite
-      ? "Active"
-      : settings.siteMode === "selective"
-        ? "Off"
-        : "Excluded";
+  try {
+    await chrome.scripting.executeScript({ target: { tabId: currentTabId }, files: ["content.js"] });
+    showNotice("");
+  } catch {
+    showNotice("This page does not allow extensions to change it.");
   }
 }
 
-async function updateCurrentTab(settings: AnchorSettings): Promise<void> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) return;
+function setSwitch(button: HTMLButtonElement, on: boolean, disabled = false): void {
+  button.setAttribute("aria-checked", String(on));
+  button.disabled = disabled;
+}
 
-  try {
-    await chrome.tabs.sendMessage(tab.id, { type: "anchor:settings-changed", settings });
-    showNotice("");
-  } catch {
-    if (!settings.enabled || isRestricted) return;
+function render(settings: AnchorSettings): void {
+  latest = settings;
+  const off = !settings.enabled;
+  setSwitch(enabledSwitch, settings.enabled);
+  toggleState.textContent = settings.enabled ? "On" : "Off";
+  setSwitch(fontSwitch, settings.readableFont, off);
+  setSwitch(spacingSwitch, settings.extraSpacing, off);
+  setSwitch(rulerSwitch, settings.focusRuler, off);
 
-    try {
-      // Existing tabs do not receive declared content scripts until a refresh.
-      // Injecting the built entry removes that requirement for normal webpages.
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-      showNotice("Anchor activated on this tab.");
-    } catch {
-      if (isRestricted) {
-        showNotice("Browser security policy restricts extensions on this tab.");
-      }
-    }
+  const strength = strengthFor(settings, currentTabUrl);
+  strengthInput.value = String(strength);
+  strengthInput.disabled = off;
+  strengthValue.value = `${strength}%`;
+  siteStrengthRow.hidden = !currentDomain || isRestricted;
+  siteStrengthDomain.textContent = currentDomain || "this site";
+  siteStrengthInput.checked = siteStrengthKey(settings, currentTabUrl) !== undefined;
+  siteStrengthInput.disabled = off;
+
+  for (const input of cadenceInputs) {
+    input.checked = input.value === settings.cadence;
+    input.disabled = off;
   }
+  cadenceHint.textContent = CADENCE_HINTS[settings.cadence];
+
+  if (isRestricted) {
+    siteCard.hidden = true;
+    restrictedNotice.hidden = false;
+    return;
+  }
+  restrictedNotice.hidden = true;
+  siteCard.hidden = false;
+  siteDomain.textContent = currentDomain || "This page";
+
+  const active = isSiteActive(settings, currentTabUrl);
+  const selective = settings.siteMode === "selective";
+  siteStatusDot.className = `site-status-dot ${active ? "active" : ""}`;
+  siteStatusText.textContent = active
+    ? "Anchor active on this page"
+    : off
+      ? "Reader paused"
+      : selective
+        ? "Not enabled for this site"
+        : "Excluded for this site";
+  siteToggleBtn.disabled = off || !currentDomain;
+  siteToggleBtn.className = `site-toggle-btn ${active ? "active" : ""}`;
+  siteToggleBtn.textContent = active ? "Active" : selective ? "Off" : "Excluded";
 }
 
 function showNotice(message: string): void {
