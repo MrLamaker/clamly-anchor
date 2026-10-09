@@ -36,6 +36,9 @@ test("every page loads without errors, failed requests or a missing title", asyn
     expect(response?.status(), path).toBe(200);
     expect(await page.title(), path).toMatch(/\S/);
     await expect(page.locator("h1"), path).toHaveCount(1);
+    // Let the page's link prefetches finish, so their responses are checked too. WebKit also
+    // reports requests that the next navigation cuts off as errors ("access control checks").
+    await page.waitForLoadState("networkidle");
   }
   expect(errors).toEqual([]);
   expect(failed).toEqual([]);
