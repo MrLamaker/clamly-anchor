@@ -23,9 +23,9 @@
     "release": "pnpm --filter \"./packages/*\" run build && changeset publish"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.15",
+    "@biomejs/biome": "^2.6.4",
     "@changesets/cli": "^3.0.3",
-    "esbuild": "0.28.1",
+    "esbuild": "0.28.2",
     "typescript": "^7.0.2"
   }
 }
